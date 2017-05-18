@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Waterpump</title>
+  <link href="/data/style.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/data/supa.js"></script>
+
+</head>
+<body>
+    <nav class="nav" tabindex="-1" onclick="this.focus()">
+    <div class="container">
+        <a class="pagename current" href="#" onclick="update_status();"> Waterpump</a>
+        <a href="#" onclick="update_log();">Log</a> 
+    </div>
+    </nav>
+<div class="container">
+<p id="data"></p>
+</div>
+
+<script type="text/javascript">
+
+function get_target() 
+{ 
+  return document.getElementById("data"); 
+};
+
+function update_status()
+{
+  make_json_request( "/get/status", function( json_obj ) {
+   
+   get_target().innerHTML = "Status:" + json_obj.status + "<br />" + "Uptime:" + json_obj.uptime;
+  } );
+};
+
+function update_log()
+{
+  make_json_request( "/get/log", function( json_obj ) {
+    var entries = json_obj.log;
+    var text = "";
+    for ( var loop = 0; loop < entries.length; loop ++ )
+    {
+        text = text + entries[loop] + "\n"
+    }
+    get_target().innerHTML = "<pre>" + text + "</pre>";
+  } );
+};
+
+update_status();
+</script>
+</body>
+</html>
