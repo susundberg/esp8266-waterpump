@@ -2,14 +2,10 @@
 #include <ESP8266WebServer.h>
 #include <FS.h>
 
-#define MODULE_NAME "WebServer"
 #include "webserver.h"
 #include "logger.h"
 
 ESP8266WebServer WEBSERVER(80);
-
-
-
 
 char* webserver_get_buffer()
 {
@@ -104,31 +100,10 @@ static void handle_status()
    
    free(buffer);
 }
-void print_files( const char* path )
-{
-   LOG_INFO("Listing directory %s", path );
-   
-   fs::Dir dir = SPIFFS.openDir(path);
-   while (dir.next()) {
-       fs::File f = dir.openFile("r");
-       const char* fn = dir.fileName().c_str();
-       int size = f.size();
-       
-       LOG_INFO( "File: %s - %u", fn, size );
-   }  
-}
-
-void handle_files()
-{
-   print_files("/");
-   print_files("/data");
-   WEBSERVER.send( 200,  "application/json", "{}" );
-}
 
 void webserver_setup()
 {
   WEBSERVER.on( "/get/log", handle_log );
-  WEBSERVER.on( "/get/files", handle_files );
   WEBSERVER.on( "/get/status", handle_status );
   WEBSERVER.serveStatic("/", SPIFFS, "/index.html", "max-age=86400");
   WEBSERVER.serveStatic("/data/", SPIFFS, "/", "max-age=86400");

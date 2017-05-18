@@ -16,5 +16,7 @@ struct EmailSettings
 /// @returns true if sending has succeeded.
 bool email_send( const EmailSettings* settings, const char* receiver, const char* subject, const char* message );
 
+
+
 #endif
 

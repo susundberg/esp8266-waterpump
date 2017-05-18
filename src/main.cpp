@@ -8,7 +8,7 @@
 #include "email_send.h"
 
 
-#include "RTClib.h"
+
 
 #define MODULE_NAME "Main"
 
@@ -17,20 +17,15 @@
 #include "webserver.h"
 #include "distance.h"
 
+#include "device_rtc.h"
 
-#define PIN_RTC_SCL 14
-#define PIN_RTC_SDA 12
-#define PIN_LED     15
-#define PIN_PUMP    4
-#define PIN_SWITCH  16
-#define PIN_TRIGGER 2
-#define PIN_ECHO    5
 #define TIMEOUT_ON_WLAN_CONNECT_S 30 
 
 
+Device_rtc DEV_RTC("rtc");
 
 Distance DISTANCE;
-RTC_DS1307 RTC;
+
 HTU21D HUMIDITY;
 
 void setup_misc()
@@ -48,22 +43,7 @@ void setup_humidity(void)
 
 void setup_rtc(void)
 {
-  LOG_INFO("RTC boot!");
 
-  if (! RTC.isrunning()) 
-  {
-    LOG_INFO("RTC is NOT running!");
-    
-    // following line sets the RTC to the date & time this sketch was compiled
-    RTC.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    // This line sets the RTC with an explicit date & time, for example to set
-    // January 21, 2014 at 3am you would call:
-    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
-  }
-  else
-  {
-     LOG_INFO("RTC is running!");
-  }
 }
 
 void setup_wifi(void)
@@ -71,7 +51,7 @@ void setup_wifi(void)
   
   WiFi.mode(WIFI_STA);
   // Connect to WiFi network
-  WiFi.begin( CONFIG::wlan_sid, CONFIG::wlan_pass );
+  WiFi.begin( CONFIG.wlan.sid, CONFIG.wlan.pass);
   
   int rtc_done = 0;
   
@@ -93,7 +73,7 @@ void setup_wifi(void)
 
     
   LOG_INFO("WIFI ok..");
-  LOG_INFO("Connected to %s - IP: %s", CONFIG::wlan_sid, WiFi.localIP().toString().c_str() );
+  LOG_INFO("Connected to %s - IP: %s", CONFIG.wlan.sid, WiFi.localIP().toString().c_str() );
   
 }
 
@@ -103,7 +83,7 @@ void setup_ota()
   // Port defaults to 8266
   // ArduinoOTA.setPort(8266);
 
-  ArduinoOTA.setHostname( CONFIG::hostname );
+  ArduinoOTA.setHostname( CONFIG.hostname );
 
   // No authentication by default
   // ArduinoOTA.setPassword("admin");
@@ -209,98 +189,25 @@ void handle_i2c()
 #define EMAIL_SUBJECT "Waterpump status"
 
 
-void handle_email()
-{
-   EmailSettings settings = { .login = EMAIL_LOGIN, .password=EMAIL_PASSWORD, .sender = EMAIL_SENDER, .server_host = EMAIL_SERVER_HOST, .server_port = 465 };
-
-   LOG_INFO("Sending email to %s", EMAIL_RECEIVER );
-   bool ret = email_send( &settings, EMAIL_RECEIVER, EMAIL_SUBJECT, "Email message is here\n With some lines.\nCheers,\nRobot\n\n");
-
-   char* buffer = webserver_get_buffer();   
-   snprintf( buffer, WEBSERVER_MAX_RESPONSE_SIZE, "{\"status\":%d}", ret );
-   WEBSERVER.send( 200, "application/json", buffer  );
-   free(buffer);
-}
-
-
-void handle_misc()
-{
-   char* buffer = webserver_get_buffer();   
-   
-   static bool pump = false;
-   pump = !pump;
-   
-   digitalWrite( PIN_PUMP, pump );
-   int manual_switch = digitalRead( PIN_SWITCH );
-   
-   snprintf( buffer, WEBSERVER_MAX_RESPONSE_SIZE, "{\"switch\":%d, \"pump\":%d }", manual_switch, pump );
-   WEBSERVER.send( 200, "application/json", buffer );
-
-   free(buffer);
-}
 
 void handle_temp()
 {
    char* buffer = webserver_get_buffer();   
     
-   DateTime now = RTC.now();
    int humd = HUMIDITY.readHumidity();
    int temp = HUMIDITY.readTemperature();
    
    
-   snprintf( buffer, WEBSERVER_MAX_RESPONSE_SIZE, "{ \"temperature\":%d,\"humidity\":%d, \"rtc\":%d }", 
-             temp, humd, now.unixtime() );
+   snprintf( buffer, WEBSERVER_MAX_RESPONSE_SIZE, "{ \"temperature\":%d,\"humidity\":%d }", 
+             temp, humd  );
    WEBSERVER.send( 200, "application/json", buffer );
    free(buffer);
 }
  
-
-void handle_sensor()
-{
-   char* buffer = webserver_get_buffer();   
-   int distance = DISTANCE.get_distance();
-   
-
-   // LM35 produces 0.01v per C -> val(Volts) * 100 C/volts = Volts
-   // times 10 to get single desimal, though the ADC circuit seems more like a joke.
-
-/** 
- 
-Fitted to measurements made with my ESP
-
-[[0.09, 0.0],
- [0.16, 51.0],
- [0.28, 179.0],
- [0.42, 309.0],
- [0.59, 471.0],
- [0.72, 596.0],
- [0.8, 676.0],
- [0.87, 758.0],
- [1.0, 870.0],
- [0.14, 35.0]]
- -> 
-In [25]: numpy.polyfit( m[1:,0],m[1:,1], 1)
-Out[25]: array([ 974.6595692 , -100.97829496])
-
-value = 975 * volt - 100 
--> volt = (value + 100)/975
-*/
-   int analog_value = analogRead( A0 );
-   unsigned long temp_long = ((unsigned long)(analog_value+CALIBRATION_ADC_OFFSET)*1000UL + (CALIBRATION_ADC_RANGE/2))/CALIBRATION_ADC_RANGE;
-   int temp_degs  = temp_long / 10;
-   int temp_parts = temp_long - temp_degs*10;
-   
-   DateTime now = RTC.now();
-    
-   snprintf( buffer, WEBSERVER_MAX_RESPONSE_SIZE, "{\"distance\":%d, \"temperature\":%d.%d,\"temp_raw\":%d, \"rtc\":%d }", 
-             distance, temp_degs, temp_parts, analog_value, now.unixtime() );
-   WEBSERVER.send( 200, "application/json", buffer );
-   free(buffer);
-}
 
 void setup()
 {
-  LOG.setup_serial( CONFIG::hostname, 115200 );
+  LOG.setup_serial( CONFIG.hostname , 115200 );
   LOG.setup_led( PIN_LED );
   DISTANCE.setup( PIN_TRIGGER, PIN_ECHO );
   pinMode( A0, INPUT);
@@ -323,12 +230,7 @@ void setup()
   }
 
   webserver_setup();
-  WEBSERVER.on("/get/sensor", handle_sensor );
-  WEBSERVER.on("/get/i2c", handle_i2c );
   WEBSERVER.on("/get/temp", handle_temp );
-  WEBSERVER.on("/get/misc", handle_misc );
-  WEBSERVER.on("/get/email", handle_email);
-  
   LOG.set_status( Logger::Status::RUNNING );
 }
 

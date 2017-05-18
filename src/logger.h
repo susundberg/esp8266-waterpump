@@ -11,7 +11,7 @@ class Logger
    public:
       
      enum class Status { BOOTING, RUNNING, ERROR };
-     enum class Level { DEBUG, INFO, WARNING, ERROR };
+     enum class Level { DEBUG, INFO, WARNING, ERROR, FATAL };
      
      static const int max_lines = 16;
      static const int max_line_len = 80;
@@ -57,5 +57,6 @@ extern Logger LOG;
 #define LOG_INFO( format, ... ) LOG.log( Logger::Level::INFO, F(format) , ## __VA_ARGS__ )
 #define LOG_WARN( format, ... ) LOG.log( Logger::Level::WARNING, F(format), ## __VA_ARGS__ )
 #define LOG_ERROR( format, ... ) LOG.log( Logger::Level::ERROR, F(format), ## __VA_ARGS__ )
+#define LOG_FATAL( format, ... ) LOG.log( Logger::Level::FATAL, F(format), ## __VA_ARGS__ )
 
 #endif

@@ -2,3 +2,4 @@
 .piolibdeps
 *.kdev4
 .scons*
+*.secret

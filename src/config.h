@@ -3,19 +3,42 @@
 #define SUPA_CONFIG_H
 
 
-class CONFIG
+/// Lets provide the 'user side' configuration as struct, so that its easier to change
+/// to read those from eeprom or file, if such day comes. 
+
+struct ConfigEmail
 {
-   public:
-   static constexpr const char* wlan_sid = "WLAN_SSID";
-   static constexpr const char* wlan_pass = "WLAN_PASSWD";
-   static constexpr const char* hostname = "waterpump";
+   const char* server_host;
+   int         server_port;
+   const char* login;
+   const char* password;
 };
 
+struct ConfigWlan
+{
+   const char* sid  ;  
+   const char* pass ;
+};
 
-#define EMAIL_LOGIN "foo.bar@gmail.com"
-#define EMAIL_PASSWORD "app-specific-password"
-#define EMAIL_RECEIVER "foofoo@gmail.com"
+struct Config
+{
+ public:
+   ConfigEmail email;
+   ConfigWlan  wlan;
+   const char* hostname;
+};
 
+extern const Config CONFIG;
+
+/// The hardware side on the other hand may very well be forever fixed.
+
+#define PIN_RTC_SCL 14
+#define PIN_RTC_SDA 12
+#define PIN_LED     15
+#define PIN_PUMP    4
+#define PIN_SWITCH  16
+#define PIN_TRIGGER 2
+#define PIN_ECHO    5
 
 
 #endif
