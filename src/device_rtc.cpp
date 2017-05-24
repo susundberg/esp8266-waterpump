@@ -31,6 +31,11 @@ void Device_rtc::setup()
   
 }
 
+void Device_rtc::update_time(uint32_t ntp_time)
+{
+   rtc.adjust( DateTime(ntp_time) );
+}
+
 
 void Device_rtc::loop()
 {
@@ -41,4 +46,5 @@ void Device_rtc::loop()
    DateTime now = rtc.now();
    value = now.unixtime(); // this loses one bit,   math.log( 365*24*60*60*60 )/math.log(2) = 30.81738694131409 so we should be ok, until = 2030, thats ok. 
 }
+
 

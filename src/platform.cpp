@@ -12,6 +12,7 @@
 
 #define TIMEOUT_ON_WLAN_CONNECT_S 30 
 
+Platform_ESP8266 PLATFORM;
 
 void Platform_ESP8266::setup()
 {
@@ -33,6 +34,16 @@ void Platform_ESP8266::setup_wifi(void)
   // Connect to WiFi network
   WiFi.begin( CONFIG.wlan.sid, CONFIG.wlan.pass);
   LOG_INFO("Wifi starting up .. ");
+}
+
+bool Platform_ESP8266::connected()
+{
+   return wifi_ok;
+}
+
+unsigned int Platform_ESP8266::get_free_heap()
+{
+   return ESP.getFreeHeap();
 }
 
 
@@ -100,6 +111,10 @@ void Platform_ESP8266::setup_ota()
   ArduinoOTA.begin();
 }
 
+void Platform_ESP8266::loop_ota()
+{
+   ArduinoOTA.handle();
+}
 
 void Platform_ESP8266::setup_fs()
 {

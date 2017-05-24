@@ -2,14 +2,10 @@
 #define SUPA_NTP_CIENT_H
 
 
-void ntp_client_loop();
-void ntp_client_setup();
+#include <stdint.h>
 
-/// @returns current time since epoc in seconds if time has been aquired, otherwise will return 
-/// relative time from the boot
-unsigned long ntp_client_gettime();
+/// @returns current time since epoc in seconds, on error returns 0
+uint32_t ntp_update();
 
-/// @returns true if the time has been synced from server. false means that this is local time.
-bool ntp_client_valid();
 
 #endif

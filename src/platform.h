@@ -11,6 +11,7 @@ public:
    void loop();
    
    bool connected(); // returns true if wlan has been aquired.
+   unsigned int get_free_heap();
    
 protected:
    bool wifi_ok;

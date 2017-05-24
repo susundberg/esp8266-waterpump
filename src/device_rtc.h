@@ -13,6 +13,7 @@ public:
    Device_rtc( const char* name );
    virtual void loop() override;
    virtual void setup() override;
+   void update_time(uint32_t ntp_time);
    
 protected:
    RTC_DS1307 rtc;

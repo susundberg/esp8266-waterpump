@@ -16,6 +16,7 @@ Logger::Logger()
    this->led_pin = -1;
    this->line_loop = 0;
    this->serial_baudrate = 0;
+   this->fatal_hook = NULL;
    memset( this->buffer, 0x00, sizeof(this->buffer));
    memset( this->format, 0x00, sizeof(this->format));
 }
@@ -28,6 +29,11 @@ void Logger::setup_serial( const char* hostname, int serial_baudrate )
    
 }
 
+
+void Logger::setup_fatal_hook(LoggerFatalHook hook)
+{
+   this->fatal_hook = hook;
+}
 
 void Logger::setup_led( int led_pin )
 {
@@ -107,9 +113,16 @@ void Logger::log( Logger::Level level,  const __FlashStringHelper* format_flash,
       serial_print_raw( buf, buffer_len, true);
    }
    
-   if ( level == Logger::Level::ERROR )
+   if ( level == Logger::Level::FATAL )
       this->set_status( Logger::Status::ERROR );
+   
+   if ( level == Logger::Level::FATAL || level == Logger::Level::ERROR )
+   {
+      if ( this->fatal_hook != NULL )
+         this->fatal_hook( buf );
+   }
 }
+
 
 void Logger::loop()
 {
