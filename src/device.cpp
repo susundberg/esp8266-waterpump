@@ -12,6 +12,10 @@ void Device::loop()
 { // nop
 }
 
+void Device::setup()
+{  // nop
+}
+
 
 Device_input::Device_input( const char* name )
   : Device(name)
@@ -22,7 +26,7 @@ Device_input::Device_input( const char* name )
 
 int Device_input::jsonify( char* buffer, int buffer_len )
 {
-   return snprintf( buffer, buffer_len, "\"%s\":{\"value\":%d}", value );
+   return snprintf( buffer, buffer_len, "\"%s\":{\"value\":%d}", name, value );
 }
 
 int Device_input::get_value() 

@@ -14,4 +14,5 @@ const Config CONFIG = {
      .pass = "WLAN_PASSWD",
    },   
    .hostname = "waterpump",
+   .password = "waterize"
 };

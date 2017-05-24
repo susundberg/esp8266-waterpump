@@ -11,6 +11,7 @@ public:
    /// Return json string like '"led" : { "value" : 1}}'. @returns the length of the added content.
    virtual int jsonify( char* buffer, int buffer_len ) = 0;
    virtual void loop();
+   virtual void setup();
    
 protected:
      const char* name;

@@ -4,8 +4,12 @@
 
 #include "logger.h"
 
-Device_rtc::Device_rtc(const char* name )
-  :  Device_input(name)
+Device_rtc::Device_rtc( const char* name ) :
+ Device_input(name)
+{
+}
+ 
+void Device_rtc::setup()
 {
    
   LOG_INFO("RTC boot!");

@@ -12,6 +12,7 @@ class Device_rtc : public Device_input
 public:
    Device_rtc( const char* name );
    virtual void loop() override;
+   virtual void setup() override;
    
 protected:
    RTC_DS1307 rtc;

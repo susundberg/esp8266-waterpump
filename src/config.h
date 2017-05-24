@@ -26,6 +26,7 @@ struct Config
    ConfigEmail email;
    ConfigWlan  wlan;
    const char* hostname;
+   const char* password;
 };
 
 extern const Config CONFIG;
