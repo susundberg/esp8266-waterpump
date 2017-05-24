@@ -4,7 +4,7 @@
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
 #include <FS.h>
-#include "SparkFunHTU21D.h"
+
 #include "email_send.h"
 
 
@@ -18,43 +18,52 @@
 
 #include "device_rtc.h"
 #include "device_wlevel.h"
+#include "device_temp.h"
 #include "platform.h"
+#include "device_pin_in.h"
+#include "device_pin_out.h"
 
 
+Device_rtc     DEV_RTC("rtc");
+Device_wlevel  DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO );
+Device_pin_in   DEV_WDETECT("water_detect", PIN_WDETECT, 8 ); // water detect switch
+Device_temphum DEV_TEMP("temperature" );
+Device_temphum DEV_HUMI("humidity" );
+Device_pin_out  DEV_PUMP("pump", PIN_PUMP, 1 );
+Device_pin_in   DEV_SWITCH("switch", PIN_SWITCH, 8 ); // manual switch
 
-Device_rtc    DEV_RTC("rtc");
-Device_wlevel DEV_WLEVEL("wlevel", PIN_TRIGGER, PIN_ECHO );
-Platform_ESP8266 PLATFORM;
 
-HTU21D HUMIDITY;
+const Device* DEVICES[] = { &DEV_RTC, &DEV_WLEVEL, &DEV_WDETECT };
 
-void setup_misc()
+void logger_fatal_hook( const char* log_line )
 {
-    pinMode( PIN_PUMP, OUTPUT);
-    digitalWrite( PIN_PUMP, 1 );
-    pinMode( PIN_SWITCH, INPUT);
-}
-
-
-void setup_humidity(void)
-{
-   HUMIDITY.begin();
-}
-
-
-void handle_temp()
-{
-   char* buffer = webserver_get_buffer();   
-    
-   int humd = HUMIDITY.readHumidity();
-   int temp = HUMIDITY.readTemperature();
+   // if we are not connected, we are not storing the messages for now.
+   if ( PLATFORM.connected() == false )
+      return;
+      
+   int buffer_len = Logger::max_line_len + 128 ;
+   int subject_len = 256;
+   char* buffer  = (char*)malloc( buffer_len );
+   char* subject = (char*)malloc( subject_len );
    
+   memset( buffer, 0x00, buffer_len );
+   memset( subject, 0x00, subject_len );
    
-   snprintf( buffer, WEBSERVER_MAX_RESPONSE_SIZE, "{ \"temperature\":%d,\"humidity\":%d }", 
-             temp, humd  );
-   WEBSERVER.send( 200, "application/json", buffer );
-   free(buffer);
+   // out of memory, lets skip the whole thing.
+   if ( buffer == NULL || subject == NULL )
+      return;
+   
+   snprintf( buffer, buffer_len, "Error on %s: %s.\n", CONFIG.hostname, log_line );
+   snprintf( subject, subject_len, "[ESP] %s : error detected", CONFIG.hostname );
+   
+   email_send( &CONFIG.email, CONFIG.email.receiver, subject, buffer );
+               
+   free( subject );
+   free( buffer );
 }
+
+
+
  
 
 void setup()
@@ -62,16 +71,7 @@ void setup()
   LOG.setup_serial( CONFIG.hostname , 115200 );
   LOG.setup_led( PIN_LED );
   
-  DEV_WLEVEL.setup();
-  DEV_RTC.setup();
-  
-
-  setup_humidity();
-  setup_misc();
-  
-
   webserver_setup();
-  WEBSERVER.on("/get/temp", handle_temp );
   LOG.set_status( Logger::Status::RUNNING );
 }
 

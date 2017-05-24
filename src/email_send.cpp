@@ -70,7 +70,7 @@ bool read_response(WiFiClientSecure* client, char* buffer, int buffer_len, const
   
 }
 
-bool email_send_raw( const EmailSettings* settings, const char* receiver, const char* subject, const char* message, 
+bool email_send_raw( const ConfigEmail* settings, const char* receiver, const char* subject, const char* message, 
                      char* buffer, WiFiClientSecure* client )
 {
 
@@ -109,7 +109,7 @@ bool email_send_raw( const EmailSettings* settings, const char* receiver, const 
 
   LOG_INFO("Login ok");
   
-  sprintf( buffer, FSTR("MAIL FROM: <%s>"), settings->sender );
+  sprintf( buffer, FSTR("MAIL FROM: <%s>"), settings->login );
   client->println( buffer );
   
   if( read_response( client, buffer, EMAIL_SEND_MAX_SIZE, "\n", FSTR("250"), FSTR("mail_from") ) == false )
@@ -125,7 +125,7 @@ bool email_send_raw( const EmailSettings* settings, const char* receiver, const 
      return false;
 
   sprintf( buffer, FSTR("From: <%s>\nTo: <%s>\nSubject: %s\r\n\n%s\r\n.\r\nQUIT"), 
-           settings->sender, receiver, subject, message );
+           settings->login, receiver, subject, message );
   client->println( buffer );
   
   if( read_response( client, buffer, EMAIL_SEND_MAX_SIZE, "\n", FSTR("250"), FSTR("quit") ) == false )
@@ -136,7 +136,7 @@ bool email_send_raw( const EmailSettings* settings, const char* receiver, const 
 
 
 
-bool email_send( const EmailSettings* settings, const char* receiver, const char* subject, const char* message )
+bool email_send( const ConfigEmail* settings, const char* receiver, const char* subject, const char* message )
 {
   char* buffer = (char*)malloc( EMAIL_SEND_MAX_SIZE ); 
   WiFiClientSecure* client = new WiFiClientSecure();

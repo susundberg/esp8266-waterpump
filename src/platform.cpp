@@ -15,12 +15,20 @@
 
 void Platform_ESP8266::setup()
 {
-   
+   this->setup_fs();
+   this->setup_i2c();
+   this->setup_wifi();
+   this->setup_ota();
+}
+
+void Platform_ESP8266::loop()
+{
+   this->loop_wifi();
+   this->loop_ota();
 }
 
 void Platform_ESP8266::setup_wifi(void)
 { 
-  
   WiFi.mode(WIFI_STA);
   // Connect to WiFi network
   WiFi.begin( CONFIG.wlan.sid, CONFIG.wlan.pass);

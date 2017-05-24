@@ -4,7 +4,10 @@
 
 #include <ESP8266WiFi.h>
 
+
 #include "stimer.h"
+
+typedef void (*LoggerFatalHook)(const char* error_line);
 
 class Logger
 {
@@ -20,6 +23,7 @@ class Logger
      
      void setup_serial( const char* hostname, int serial_baudrate=115200 );
      void setup_led( int led_pin_ );
+     void setup_fatal_hook( LoggerFatalHook hook );
      
      Logger::Status get_status();
      void set_status( Logger::Status status );
@@ -33,10 +37,11 @@ class Logger
      
   private:
      STimer led_timer;
-     int led_pin;
+     LoggerFatalHook fatal_hook;
+     int  line_loop;
+     int  serial_baudrate;
+     int  led_pin;
      bool led_state;
-     int line_loop;
-     int serial_baudrate;
      Logger::Status status;
      char buffer[ max_lines*max_line_len ];
      char format[ max_line_len ];

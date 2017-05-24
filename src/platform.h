@@ -5,6 +5,8 @@
 
 class Platform_ESP8266
 {
+   
+public:
    void setup();
    void loop();
    
@@ -22,5 +24,6 @@ protected:
    void loop_ota();
 } ;
 
+extern Platform_ESP8266 PLATFORM;
 
 #endif

@@ -8,6 +8,7 @@ const Config CONFIG = {
       .server_port = 465, 
       .login = "gmail_login@gmail.com",
       .password = "email_password",
+      .receiver = "any_email@any.com",
    },
    .wlan = {
      .sid  = "WLAN_SSID",

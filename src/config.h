@@ -12,6 +12,7 @@ struct ConfigEmail
    int         server_port;
    const char* login;
    const char* password;
+   const char* receiver;
 };
 
 struct ConfigWlan
@@ -40,6 +41,7 @@ extern const Config CONFIG;
 #define PIN_SWITCH  16
 #define PIN_TRIGGER 2
 #define PIN_ECHO    5
+#define PIN_WDETECT 13
 
 
 #endif

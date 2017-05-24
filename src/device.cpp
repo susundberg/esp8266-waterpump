@@ -1,11 +1,12 @@
 #include <stdio.h>
 
-
+#include "logger.h"
 #include "device.h"
 
 Device::Device( const char* name )
 {
    this->name = name;
+   this->value = 0;
 }
 
 void Device::loop()
@@ -20,17 +21,28 @@ void Device::setup()
 Device_input::Device_input( const char* name )
   : Device(name)
 {
-   this->value = 0;
 }
 
 
-int Device_input::jsonify( char* buffer, int buffer_len )
+Device_output::Device_output( const char* name )
+  : Device(name)
 {
-   return snprintf( buffer, buffer_len, "\"%s\":{\"value\":%d}", name, value );
+}
+
+int Device::jsonify( char* buffer, int buffer_len )
+{
+   int len = snprintf( buffer, buffer_len, "\"%s\":{\"value\":%d}", name, value );
+   if (len >= buffer_len)
+   {
+      LOG_ERROR("Jsonify: too long on '%s'", name );
+      return 0;
+   }
+   return len;
 }
 
 int Device_input::get_value() 
 {
    return value;
 }
+
 
