@@ -2,6 +2,8 @@
 #ifndef SUPA_DEV_RTC_H
 #define SUPA_DEV_RTC_H
 
+#include <stdint.h>
+
 #include "device.h"
 #include "RTClib.h"
 #include "stimer.h"

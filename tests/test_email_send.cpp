@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "catch.hpp"
+#include "config.h"
 #include "email_send.h"
 
 #include "WiFiClientSecure.h"
@@ -43,25 +44,24 @@ static void reply_proper( WiFiClientSecure* client )
 
 TEST_CASE( "Email", "[email]" ) 
 {
-   EmailSettings settings = { .login = "login@gmail.com", .password="password", .sender = "sender@gmail.com", .server_host = "smtp.google.com", .server_port = 465 };
    
    SECTION("No response")
    {
-      bool ret = email_send( &settings, "receiver@test.com", "Subject here", "Message body goes here" );
+      bool ret = email_send( &CONFIG.email, "receiver@test.com", "Subject here", "Message body goes here" );
       REQUIRE( ret == false );
    }
 
    SECTION("Invalid response")
    {
       WiFiClientSecure::_test_create_hook = reply_invalid;
-      bool ret = email_send( &settings, "receiver@test.com", "Subject here", "Message body goes here" );
+      bool ret = email_send( &CONFIG.email, "receiver@test.com", "Subject here", "Message body goes here" );
       REQUIRE( ret == false );
    }
 
    SECTION("Proper response")
    {
       WiFiClientSecure::_test_create_hook = reply_proper;
-      bool ret = email_send( &settings, "receiver@test.com", "Subject here", "Message body goes here" );
+      bool ret = email_send( &CONFIG.email, "receiver@test.com", "Subject here", "Message body goes here" );
       REQUIRE( ret == true );
    }
 
