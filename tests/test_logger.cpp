@@ -1,7 +1,6 @@
 
 #include "catch.hpp"
 
-#define MODULE_NAME "FOOBAR"
 
 #include "logger.h"
 #include <iostream>

@@ -10,7 +10,7 @@ DEFINE_FAKE_VALUE_FUNC( int, analogRead, uint8_t );
 DEFINE_FAKE_VOID_FUNC( analogWrite, uint8_t, int );
 DEFINE_FAKE_VOID_FUNC( delay, unsigned long );
 DEFINE_FAKE_VALUE_FUNC( unsigned long, millis );
-
+DEFINE_FAKE_VALUE_FUNC( unsigned long, pulseIn, uint8_t, uint8_t, uint8_t );
 
 
 Arduino_TEST ARDUINO_TEST;
@@ -32,6 +32,12 @@ int _arduino_test_digitalRead( uint8_t pin )
 {
    ARDUINO_TEST.check_read( pin );
    return (ARDUINO_TEST.pin_value[ pin ] != 0);
+}  
+
+unsigned long _arduino_test_pulseIn( uint8_t pin,uint8_t value, unsigned long timeout )
+{
+   ARDUINO_TEST.check_read( pin );
+   return ARDUINO_TEST.pin_value[ pin ];
 }  
 
 int _arduino_test_analogRead( uint8_t pin )
@@ -99,6 +105,7 @@ void Arduino_TEST::hookup()
    digitalRead_fake.custom_fake = _arduino_test_digitalRead;
    analogRead_fake.custom_fake = _arduino_test_analogRead;
    analogWrite_fake.custom_fake = _arduino_test_analogWrite;
+   pulseIn_fake.custom_fake = _arduino_test_pulseIn;
 
 }
 void Arduino_TEST::hookdown()
@@ -108,4 +115,5 @@ void Arduino_TEST::hookdown()
    digitalRead_fake.custom_fake = NULL;
    analogRead_fake.custom_fake = NULL;
    analogWrite_fake.custom_fake = NULL;
+   pulseIn_fake.custom_fake = NULL;
 }

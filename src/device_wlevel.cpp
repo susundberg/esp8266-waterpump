@@ -24,13 +24,16 @@ void Device_wlevel::setup()
 
 void Device_wlevel::measure_pulse_in()
 {
-   float duration = pulseIn( this->pin_echo, HIGH);
+   constexpr const float speed_of_sound_scalar = 0.17175f;
+   constexpr const unsigned long max_timeout = max_range_mm / speed_of_sound_scalar;
+   
+   float duration = pulseIn( this->pin_echo, HIGH, max_timeout );
     
    //Calculate the distance (in cm) based on the speed of sound.
    // c = 343.5 * 1000 / 1000000 = 0.3435 mm/ss
    // and we go there and back -> *.5
    
-   float distance = (duration*0.17175f);
+   float distance = (duration*speed_of_sound_scalar);
     
    if (distance >= this->max_range_mm || distance <= min_range_mm )
    {

@@ -9,6 +9,7 @@ Device_input( name )
    this->pin = pin;
    this->filter_len = filter_len;
    this->filter_sum = 0;
+   this->value = -1;
 }
 
 void Device_pin_in::setup()
