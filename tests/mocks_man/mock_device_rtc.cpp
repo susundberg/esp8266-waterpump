@@ -13,3 +13,6 @@ DEFINE_FAKE_VOID_FUNC( Device_rtc__setup,  Device_rtc* );
 void Device_rtc::setup()  { Device_rtc__setup(  this ); }
 DEFINE_FAKE_VOID_FUNC( Device_rtc__update_time,  Device_rtc*, uint32_t );
 void Device_rtc::update_time(uint32_t ntp_time)  { Device_rtc__update_time(  this, ntp_time ); }
+
+DEFINE_FAKE_VOID_FUNC( Device_rtc__time_of_day,  Device_rtc*, Config_run_table_time* );
+void Device_rtc::time_of_day( Config_run_table_time* now )  { Device_rtc__time_of_day(  this, now ); }

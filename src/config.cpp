@@ -17,8 +17,8 @@ const Config CONFIG = {
    .runtable = {  // Run the pump for 1min every 15min from 7:00 to 20:00
       .active_start = { .hour = 7, .minute = 0, .second = 0 },
       .active_stop = { .hour = 20, .minute = 0, .second = 0 },
-      .perid_on = { .hour = 0, .minute = 1, .second = 0 },
-      .perid_off = { .hour = 0, .minute = 14, .second = 0 } 
+      .period_on = { .hour = 0, .minute = 1, .second = 0 },
+      .period_off = { .hour = 0, .minute = 14, .second = 0 } 
    },
    .pump = {
       .low_level_height_mm  = 400,

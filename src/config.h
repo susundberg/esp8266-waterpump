@@ -34,8 +34,8 @@ struct Config_run_table
 {
    Config_run_table_time active_start; // at what hour does the active
    Config_run_table_time active_stop;
-   Config_run_table_time perid_on;
-   Config_run_table_time perid_off;
+   Config_run_table_time period_on;
+   Config_run_table_time period_off;
 };
 
 struct Config_pump

@@ -13,7 +13,7 @@
 #include "platform.h"
 #include "device_pin_in.h"
 #include "device_pin_out.h"
-
+#include "logic.h"
 
 Device_rtc      DEV_RTC("rtc");
 Device_wlevel   DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO );
@@ -22,7 +22,7 @@ Device_temphum  DEV_TEMP("temperature" );
 Device_temphum  DEV_HUMI("humidity" );
 Device_pin_out  DEV_PUMP("pump", PIN_PUMP, 1 );
 Device_pin_in   DEV_SWITCH("switch", PIN_SWITCH, 8 ); // manual switch
-
+Logic           LOGIC;
 
 Device* const DEVICES[]  = { &DEV_PUMP, &DEV_SWITCH, &DEV_RTC, &DEV_WLEVEL, &DEV_WDETECT, &DEV_TEMP, &DEV_HUMI,  };
 
@@ -169,6 +169,10 @@ void loop()
    
    for ( unsigned int loop = 0; loop < DEVICES_N; loop ++ )
      DEVICES[loop]->loop();
+   
+   Config_run_table_time time_now;
+   DEV_RTC.time_of_day( &time_now );
+   LOGIC.run_logic( &time_now, &DEV_PUMP, DEV_WLEVEL.get_value(), DEV_WLEVEL.get_value(), DEV_SWITCH.get_value() );
    
 }
 

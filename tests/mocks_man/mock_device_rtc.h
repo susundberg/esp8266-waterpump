@@ -16,5 +16,6 @@ void Device_rtc__setup(  Device_rtc* );
 DECLARE_FAKE_VOID_FUNC( Device_rtc__setup,  Device_rtc* );
 void Device_rtc__update_time(  Device_rtc*, uint32_t );
 DECLARE_FAKE_VOID_FUNC( Device_rtc__update_time,  Device_rtc*, uint32_t );
-
+void Device_rtc__time_of_day( Device_rtc*, Config_run_table_time* );
+DECLARE_FAKE_VOID_FUNC( Device_rtc__time_of_day,  Device_rtc*, Config_run_table_time* );
 #endif // _AUTOMOCK_DEVICE_RTC_H

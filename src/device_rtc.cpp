@@ -31,6 +31,15 @@ void Device_rtc::setup()
   
 }
 
+void Device_rtc::time_of_day(Config_run_table_time* time)
+{
+   DateTime now( value );
+   
+   time->hour = now.hour();
+   time->minute = now.minute();
+   time->second = now.second();
+}
+
 void Device_rtc::update_time(uint32_t ntp_time)
 {
    rtc.adjust( DateTime(ntp_time) );
