@@ -9,8 +9,6 @@ Device_wlevel::Device_wlevel( const char* name, uint8_t pin_trigger, uint8_t pin
    this->pin_echo = pin_echo;
    this->pin_trigger = pin_trigger;
    this->value = 0;
-   this->state_timeout = 1000;
-   this->state = 0;
 }
 
 
@@ -29,7 +27,7 @@ void Device_wlevel::measure_pulse_in()
    
    float duration = pulseIn( this->pin_echo, HIGH, max_timeout );
     
-   //Calculate the distance (in cm) based on the speed of sound.
+   //Calculate the distance (in mm) based on the speed of sound.
    // c = 343.5 * 1000 / 1000000 = 0.3435 mm/ss
    // and we go there and back -> *.5
    
@@ -65,35 +63,15 @@ void Device_wlevel::measure_pulse_in()
 void Device_wlevel::loop()
 {
    
-   if ( this->timer.check( this->state_timeout ) == false )
+   if ( this->timer.check( measure_interval ) == false )
       return;
    
    this->timer.reset();
    
-   switch( this->state )
-   {
-      case 1:
-         digitalWrite(this->pin_trigger, LOW); 
-         this->state_timeout = 2;
-         break;
-         
-      case 2:
-         digitalWrite(this->pin_trigger, HIGH);
-         this->state_timeout = 10;
-         break;
-      
-      case 3:
-         digitalWrite(this->pin_trigger, LOW);
-         measure_pulse_in();
-         this->state_timeout = 1000;
-         break;
-         
-      default:
-         this->state = 0; // it will be increment outside of the loop -> 1 on next round
-         this->state_timeout = 0;
-         break;
-   }
-   
-   this->state = this->state + 1;
-
+   digitalWrite(this->pin_trigger, LOW); 
+   delay( 2 );
+   digitalWrite(this->pin_trigger, HIGH);
+   delay( 10 );
+   digitalWrite(this->pin_trigger, LOW);
+   measure_pulse_in();
 }

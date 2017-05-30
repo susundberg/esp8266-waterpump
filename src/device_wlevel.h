@@ -20,6 +20,7 @@ public:
    static const int min_range_mm       = 0;    
    static const int water_baselevel_mm = 400;  // when low, at what height the water level is
    static const int nfail_limit        = 16; // how many fails before reporting
+   static const int measure_interval   = 10000; 
    
    Device_wlevel( const char* name, uint8_t pin_trigger, uint8_t pin_echo );
    virtual void loop() override;
@@ -29,9 +30,6 @@ protected:
    void measure_pulse_in();
    
    STimer timer;
-   int     state_timeout;
-   
-   uint8_t state; 
    uint8_t pin_trigger;
    uint8_t pin_echo;
    uint8_t nfails;
