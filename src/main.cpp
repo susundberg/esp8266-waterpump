@@ -1,18 +1,8 @@
 #include <ESP8266WiFi.h>
 
-#include <Wire.h>
-#include <ESP8266mDNS.h>
-#include <ArduinoOTA.h>
-#include <FS.h>
+#include "config.h"
 
 #include "email_send.h"
-
-
-
-
-#define MODULE_NAME "Main"
-
-#include "config.h"
 #include "logger.h"
 #include "webserver.h"
 #include "ntp_client.h"
@@ -34,11 +24,11 @@ Device_pin_out  DEV_PUMP("pump", PIN_PUMP, 1 );
 Device_pin_in   DEV_SWITCH("switch", PIN_SWITCH, 8 ); // manual switch
 
 
- Device* const DEVICES[]  = { &DEV_PUMP, &DEV_SWITCH, &DEV_RTC, &DEV_WLEVEL, &DEV_WDETECT, &DEV_TEMP, &DEV_HUMI,  };
+Device* const DEVICES[]  = { &DEV_PUMP, &DEV_SWITCH, &DEV_RTC, &DEV_WLEVEL, &DEV_WDETECT, &DEV_TEMP, &DEV_HUMI,  };
 
 #define DEVICES_N (sizeof(DEVICES)/sizeof(Device*))
 
-void logger_fatal_hook( const char* log_line )
+static  void logger_fatal_hook( const char* log_line )
 {
    // if we are not connected, we are not storing the messages for now.
    if ( PLATFORM.connected() == false )
@@ -68,16 +58,20 @@ void logger_fatal_hook( const char* log_line )
 
 
  
-void handle_get_devices()
+static void handle_get_devices()
 {
    char* buffer = webserver_get_buffer();
    int buffer_offset = 0;
    
+   if ( buffer == NULL )
+      return;
+   
    buffer[0] = '{';
    buffer[1] = 0;
+   buffer_offset = 1;
    
-   int loop;
-   for (  loop = 0; loop < DEVICES_N; loop ++ )
+   unsigned int loop;
+   for ( loop = 0; loop < DEVICES_N; loop ++ )
    {
       Device* dev = DEVICES[loop];
       int added = dev->jsonify( buffer + buffer_offset, WEBSERVER_MAX_RESPONSE_SIZE - buffer_offset );
@@ -87,12 +81,12 @@ void handle_get_devices()
       
       buffer_offset += added;
       
-      if ( buffer_offset + 2 >= WEBSERVER_MAX_RESPONSE_SIZE )
+      if ( buffer_offset + 1 >= WEBSERVER_MAX_RESPONSE_SIZE )
          break;
       
       buffer[ buffer_offset     ] = ',';
       buffer[ buffer_offset + 1 ] = 0;
-      buffer_offset += 2;
+      buffer_offset += 1;
    }
    
    if ( loop < DEVICES_N ) // exited with break
@@ -107,7 +101,7 @@ void handle_get_devices()
    free( buffer );
 }
 
-void handle_set_ntp()
+static void handle_set_ntp()
 {
    LOG_INFO("NTP time requested.");
    uint32_t ntp_time = ntp_update();
@@ -135,7 +129,7 @@ void setup()
   
   webserver_setup();
   
-  for ( int loop = 0; loop < DEVICES_N; loop ++ )
+  for ( unsigned int loop = 0; loop < DEVICES_N; loop ++ )
      DEVICES[loop]->setup();
   
   LOG.set_status( Logger::Status::RUNNING );
@@ -173,7 +167,7 @@ void loop()
    if ( LOG.get_status() != Logger::Status::RUNNING )
       return;
    
-   for ( int loop = 0; loop < DEVICES_N; loop ++ )
+   for ( unsigned int loop = 0; loop < DEVICES_N; loop ++ )
      DEVICES[loop]->loop();
    
 }
