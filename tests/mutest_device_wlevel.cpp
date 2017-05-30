@@ -23,16 +23,16 @@ TEST_CASE( "Basic distance ", "[device]" )
    for ( int loop = 0; loop < 5; loop ++ )
       sensor.loop();
    
-   REQUIRE( sensor.get_value() == 85); // in the beginning we take directly the new value
+   REQUIRE( sensor.get_value() == 314); // in the beginning we take directly the new value
    ARDUINO_TEST.pin_value[10] = 250; // echo pin delay
    
    for ( int loop = 0; loop < 4; loop ++ )
       sensor.loop();
 
-   REQUIRE( sensor.get_value() < 85 ); // We have filter here!
+   REQUIRE( sensor.get_value() > 314 ); // We have filter here!
    
    for ( int loop = 0; loop < 500; loop ++ )
       sensor.loop();
-   REQUIRE( sensor.get_value() == 42  ); // some target, but the filter seems to settle at some point
+   REQUIRE( sensor.get_value() == 356  ); // some target, but the filter seems to settle at some point
    
 }   

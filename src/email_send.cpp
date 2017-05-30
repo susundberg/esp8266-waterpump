@@ -70,7 +70,7 @@ bool read_response(WiFiClientSecure* client, char* buffer, int buffer_len, const
   
 }
 
-bool email_send_raw( const ConfigEmail* settings, const char* receiver, const char* subject, const char* message, 
+bool email_send_raw( const Config_email* settings, const char* receiver, const char* subject, const char* message, 
                      char* buffer, WiFiClientSecure* client )
 {
 
@@ -136,7 +136,7 @@ bool email_send_raw( const ConfigEmail* settings, const char* receiver, const ch
 
 
 
-bool email_send( const ConfigEmail* settings, const char* receiver, const char* subject, const char* message )
+bool email_send( const Config_email* settings, const char* receiver, const char* subject, const char* message )
 {
   char* buffer = (char*)malloc( EMAIL_SEND_MAX_SIZE ); 
   WiFiClientSecure* client = new WiFiClientSecure();

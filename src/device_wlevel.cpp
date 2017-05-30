@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "device_wlevel.h"
 #include "logger.h"
+#include "config.h"
 
 
 Device_wlevel::Device_wlevel( const char* name, uint8_t pin_trigger, uint8_t pin_echo ) :
@@ -23,7 +24,7 @@ void Device_wlevel::setup()
 void Device_wlevel::measure_pulse_in()
 {
    constexpr const float speed_of_sound_scalar = 0.17175f;
-   constexpr const unsigned long max_timeout = max_range_mm / speed_of_sound_scalar;
+   const unsigned long max_timeout = CONFIG.pump.low_level_height_mm / speed_of_sound_scalar;
    
    float duration = pulseIn( this->pin_echo, HIGH, max_timeout );
     
@@ -31,25 +32,24 @@ void Device_wlevel::measure_pulse_in()
    // c = 343.5 * 1000 / 1000000 = 0.3435 mm/ss
    // and we go there and back -> *.5
    
-   float distance = (duration*speed_of_sound_scalar);
+   float distance = (duration*speed_of_sound_scalar);   
     
-   if (distance >= this->max_range_mm || distance <= min_range_mm )
+   if (distance == 0 )
    {
-      return ; // no update
       nfails += 1;
-      
       if ( nfails >= nfail_limit )
       {
          LOG_ERROR("Distance sensor is failing.");
          this->value = 0;
       }
-         
+      return ; // no update
    }
    
+   // if the low height is 400mm and distance is 100mm our level is 300mm.
+   distance = CONFIG.pump.low_level_height_mm  - distance;
    nfails = 0;
    float ma_old = this->value;
    const float alpha = 0.5;
-   
    
    if ( this->value == 0)
    {  // in the beginning, boost directly to proper level

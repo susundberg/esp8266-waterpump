@@ -8,6 +8,6 @@ This is automatically generate mock file (from /home/pauli/DEV/arduino/water-pum
 #include "fff.h"
 #include "email_send.h"
 
-DECLARE_FAKE_VALUE_FUNC( bool, email_send, const ConfigEmail*, const char*, const char*, const char* );
+DECLARE_FAKE_VALUE_FUNC( bool, email_send, const Config_email*, const char*, const char*, const char* );
 
 #endif // _AUTOMOCK_EMAIL_SEND_H

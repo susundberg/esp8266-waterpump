@@ -35,7 +35,7 @@ TEST_CASE( "Basic device ", "[device]" )
     {
        ARDUINO_TEST.pin_value[12] = 1;
        STimer__check_fake.return_val = true;
-       for ( int loop = 0; loop < FILTER_LEN; loop ++ )
+       for ( int loop = 0; loop < FILTER_LEN/2; loop ++ )
        {
           pin.loop();
           REQUIRE( pin.get_value() == -1 );
@@ -48,7 +48,12 @@ TEST_CASE( "Basic device ", "[device]" )
        }
        // change value, we need double time for the filter to settle
        ARDUINO_TEST.pin_value[12] = 0;
-       for ( int loop = 0; loop < FILTER_LEN*2; loop ++ )
+       for ( int loop = 0; loop < FILTER_LEN /2 ; loop ++ )
+       {
+          pin.loop();
+          REQUIRE( pin.get_value() == 1 );
+       }
+       for ( int loop = 0; loop < FILTER_LEN  ; loop ++ )
        {
           pin.loop();
           REQUIRE( pin.get_value() == -1 );

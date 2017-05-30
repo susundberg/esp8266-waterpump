@@ -7,6 +7,8 @@
 #include "device.h"
 #include "RTClib.h"
 #include "stimer.h"
+#include "config.h"
+
 
 class Device_rtc : public Device_input
 {
@@ -16,6 +18,7 @@ public:
    virtual void loop() override;
    virtual void setup() override;
    void update_time(uint32_t ntp_time);
+   void time_of_day( Config_run_table_time* time );
    
 protected:
    RTC_DS1307 rtc;

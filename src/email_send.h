@@ -8,7 +8,7 @@
 
 
 /// @returns true if sending has succeeded.
-bool email_send( const ConfigEmail* settings, const char* receiver, const char* subject, const char* message );
+bool email_send( const Config_email* settings, const char* receiver, const char* subject, const char* message );
 
 
 

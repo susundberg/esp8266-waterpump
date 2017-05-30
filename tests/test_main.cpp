@@ -27,7 +27,7 @@ static int dev_jsonify( Device* dev, char* buffer, int len )
    return snprintf( buffer, len, "\"%lx\":{\"value\":%d}", (unsigned long)dev, (int)(((uintptr_t)dev)%10) );
 }
 
-bool check_email( const ConfigEmail* settings, const char* receiver, const char* subject, const char* message )
+bool check_email( const Config_email* settings, const char* receiver, const char* subject, const char* message )
 {
    std::cout << "EMAIL SUBJECT: " << subject << "\n";
    std::cout << message << "\n";
