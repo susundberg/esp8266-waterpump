@@ -55,15 +55,15 @@ bool read_response(WiFiClientSecure* client, char* buffer, int buffer_len, const
   
   if ( buffer_offset < 3 || buffer_offset >= EMAIL_SEND_MAX_SIZE )
   {
-     LOG_ERROR("Send failed (len) at '%s'", log_string );
-     LOG_ERROR("Got: '%s'", buffer );
+     LOG_WARN("Send failed (len) at '%s'", log_string );
+     LOG_WARN("Got: '%s'", buffer );
      return false;
   }
   
   if ( strncmp( buffer, exp_response, strlen(exp_response) ) != 0 )
   {
-     LOG_ERROR("Send failed (content) at '%s'", log_string );
-     LOG_ERROR("Got: '%s'", buffer );
+     LOG_WARN("Send failed (content) at '%s'", log_string );
+     LOG_WARN("Got: '%s'", buffer );
      return false;
   }
   return true;
@@ -78,7 +78,7 @@ bool email_send_raw( const Config_email* settings, const char* receiver, const c
   
   if (!client->connect( settings->server_host, settings->server_port))
   {
-     LOG_ERROR("Send failed on connect to server");
+     LOG_WARN("Send failed on connect to server");
      return false;
   }
 
@@ -144,7 +144,7 @@ bool email_send( const Config_email* settings, const char* receiver, const char*
   bool ret = false;
   if ( client == NULL || buffer == NULL )
   {
-     LOG_ERROR("Out of memory!");
+     LOG_WARN("Out of memory!");
   }
   else
   {
