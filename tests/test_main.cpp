@@ -42,7 +42,7 @@ char* get_buffer()
 void request_ntp_set()
 {
   
-   std::string url = std::string( "set/" ) + std::string( CONFIG.password ) + std::string( "/ntp" ) ;
+   std::string url = std::string( "/set/" ) + std::string( CONFIG.password ) + std::string( "/ntp" ) ;
    WEBSERVER._test_serve( url.c_str() );
 }
 
@@ -61,7 +61,7 @@ TEST_CASE( "Main test", "[main]" )
    
    SECTION("serve devices status")
    {
-      WEBSERVER._test_serve("get/dev");
+      WEBSERVER._test_serve("/get/dev");
       REQUIRE( WEBSERVER._test_sent_code == 200 );
       std::cout << WEBSERVER._test_sent_content << "\n";
    }

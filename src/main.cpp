@@ -144,10 +144,10 @@ void setup()
   
   LOG.set_status( Logger::Status::RUNNING );
   
-  WEBSERVER.on( "get/dev", handle_get_devices );
+  WEBSERVER.on( "/get/dev", handle_get_devices );
   
   char* buffer = (char*)malloc(1024);
-  strcpy( buffer, "set/" );
+  strcpy( buffer, "/set/" );
   strcat( buffer, CONFIG.password );
   strcat( buffer, "/ntp" );
   WEBSERVER.on(  buffer , handle_set_ntp );
