@@ -31,7 +31,7 @@ Device_output::Device_output( const char* name )
 
 int Device::jsonify( char* buffer, int buffer_len )
 {
-   int len = snprintf( buffer, buffer_len, "\"%s\":{\"value\":%d}", name, value );
+   int len = snprintf( buffer, buffer_len, "{\"name\":\"%s\",\"value\":%d}", name, value );
    if (len >= buffer_len)
    {
       LOG_ERROR("Jsonify: too long on '%s'", name );

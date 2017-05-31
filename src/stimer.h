@@ -8,9 +8,9 @@ class STimer
     STimer();
     void reset();
     bool check( unsigned long timeout );
-   
+    
   protected:
-    unsigned long reset_ms;
+    unsigned long time_reset;
 };
 
 

@@ -24,7 +24,7 @@ TEST_CASE( "Basic device ", "[device]" )
    {
       char buffer[256];
       int len = pin.jsonify( buffer, 256 );
-      std::string target("\"switch\":{\"value\":-1}");
+      std::string target("{\"name\":\"switch\",\"value\":-1}");
       std::string source(buffer);
       
       REQUIRE( source.length() == len );

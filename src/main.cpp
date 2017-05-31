@@ -66,9 +66,9 @@ static void handle_get_devices()
    if ( buffer == NULL )
       return;
    
-   buffer[0] = '{';
-   buffer[1] = 0;
-   buffer_offset = 1;
+   
+   strcpy( buffer, "{\"dev\":[" );
+   buffer_offset = strlen(buffer);
    
    unsigned int loop;
    for ( loop = 0; loop < DEVICES_N; loop ++ )
@@ -81,7 +81,7 @@ static void handle_get_devices()
       
       buffer_offset += added;
       
-      if ( buffer_offset + 1 >= WEBSERVER_MAX_RESPONSE_SIZE )
+      if ( buffer_offset + 2 >= WEBSERVER_MAX_RESPONSE_SIZE )
          break;
       
       buffer[ buffer_offset     ] = ',';
@@ -95,7 +95,10 @@ static void handle_get_devices()
    }
    else
    {
-      buffer[ buffer_offset - 1 ] = '}';
+      buffer[ buffer_offset - 1 ] = ']';
+      buffer[ buffer_offset  ] = '}';
+      buffer[ buffer_offset + 1 ] = 0;
+      
       WEBSERVER.send( 200, "application/json", buffer );
    }
    free( buffer );
@@ -103,6 +106,13 @@ static void handle_get_devices()
 
 static void handle_set_ntp()
 {
+   
+   if ( PLATFORM.connected() == false )
+   {
+      WEBSERVER.send( 500, "application/json", "{\"error\":\"no wifi\"}" );
+      return;
+   }
+   
    LOG_INFO("NTP time requested.");
    uint32_t ntp_time = ntp_update();
    
@@ -134,7 +144,7 @@ void setup()
   
   LOG.set_status( Logger::Status::RUNNING );
   
-  WEBSERVER.on( "get/devices", handle_get_devices );
+  WEBSERVER.on( "get/dev", handle_get_devices );
   
   char* buffer = (char*)malloc(1024);
   strcpy( buffer, "set/" );

@@ -1,0 +1,11 @@
+{"dev":[ 
+   {"name":"water_level","value":100},
+   {"name":"water_switch","value":0},
+   {"name":"pump","value":0},
+   {"name":"rtc","value":1023812},
+   {"name":"manual_switch","value":1},
+   {"name":"temp","value":27},
+   {"name":"humidity","value":20}
+ ]
+}
+

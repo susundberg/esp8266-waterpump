@@ -6,24 +6,24 @@
 
 STimer::STimer()
 {
-   this->reset_ms = ULONG_MAX/2;
+   this->time_reset = ULONG_MAX/2;
 }
 
 void STimer::reset()
 {
-   this->reset_ms = millis();
+   this->time_reset = millis();
 }
 
 bool STimer::check(unsigned long timeout)
 {
-   unsigned long target_time  = this->reset_ms + timeout;
+   unsigned long target_time  = this->time_reset + timeout;
    unsigned long current_time = millis();
    
    // has the current time overflown:
-   if ( current_time < this->reset_ms )
+   if ( current_time < this->time_reset )
    {
       // did the target time overflowed
-      if ( this->reset_ms < target_time )
+      if ( this->time_reset < target_time )
       {  // no, it did not -> we are way over.
          return true;
       }
@@ -34,7 +34,7 @@ bool STimer::check(unsigned long timeout)
    }
    else 
    {  // timer has not overflown, how about the target?
-      if ( this->reset_ms < target_time )
+      if ( this->time_reset < target_time )
       { // no overflow, here either. Normal business
         return ( current_time >= target_time ); 
       }

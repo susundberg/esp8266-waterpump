@@ -24,7 +24,7 @@ ESP8266WebServer WEBSERVER(80);
 
 static int dev_jsonify( Device* dev, char* buffer, int len )
 {
-   return snprintf( buffer, len, "\"%lx\":{\"value\":%d}", (unsigned long)dev, (int)(((uintptr_t)dev)%10) );
+   return snprintf( buffer, len, "{\"name\":\"%lx\",\"value\":%d}", (unsigned long)dev, (int)(((uintptr_t)dev)%10) );
 }
 
 bool check_email( const Config_email* settings, const char* receiver, const char* subject, const char* message )
@@ -39,11 +39,20 @@ char* get_buffer()
    return (char*)malloc( WEBSERVER_MAX_RESPONSE_SIZE );
 }
 
+void request_ntp_set()
+{
+  
+   std::string url = std::string( "set/" ) + std::string( CONFIG.password ) + std::string( "/ntp" ) ;
+   WEBSERVER._test_serve( url.c_str() );
+}
+
+
 TEST_CASE( "Main test", "[main]" ) 
 {
    WEBSERVER._test_clear();
    RESET_FAKE( Logger__setup_fatal_hook );
-   
+   Platform_ESP8266__connected_fake.return_val = true;
+   ntp_update_fake.return_val = 1 << 20;
    setup();
    
    Device__jsonify_fake.custom_fake = dev_jsonify;
@@ -52,20 +61,30 @@ TEST_CASE( "Main test", "[main]" )
    
    SECTION("serve devices status")
    {
-      WEBSERVER._test_serve("get/devices");
+      WEBSERVER._test_serve("get/dev");
       REQUIRE( WEBSERVER._test_sent_code == 200 );
-      std::cout << WEBSERVER._test_sent_content << "\n"; 
+      std::cout << WEBSERVER._test_sent_content << "\n";
    }
    
-   SECTION("password ntp")
+   SECTION("password ntp no wifi")
    {
-      std::string url = std::string( "set/" ) + std::string( CONFIG.password ) + std::string( "/ntp" ) ;
-      
-      WEBSERVER._test_serve( url.c_str() );
-      REQUIRE( WEBSERVER._test_sent_code == 500 ); // returns zero == not valid
-      ntp_update_fake.return_val = 1 << 20;
-      WEBSERVER._test_serve( url.c_str() );
+      Platform_ESP8266__connected_fake.return_val = false;
+      request_ntp_set();
+      REQUIRE( WEBSERVER._test_sent_code == 500 ); 
+   }   
+   
+   
+   SECTION("password ntp ok")
+   {
+      request_ntp_set();
       REQUIRE( WEBSERVER._test_sent_code == 200 ); 
+   }
+      
+   SECTION("password ntp fail")
+   {
+      ntp_update_fake.return_val = 0;
+      request_ntp_set();
+      REQUIRE( WEBSERVER._test_sent_code == 500 ); // returns zero == not valid
       
    }
    

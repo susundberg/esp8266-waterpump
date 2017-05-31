@@ -50,7 +50,7 @@ void check_status_is( int value )
    REQUIRE( LOGIC.jsonify( buffer, 256 ) > 0 );
    
    char target_buffer[256];
-   sprintf(target_buffer, "\"logic\":{\"value\":%d}", value );
+   sprintf(target_buffer, "{\"name\":\"logic\",\"value\":%d}", value );
    
    std::string target(target_buffer);
    std::string source(buffer);
@@ -103,4 +103,19 @@ TEST_CASE( "Logic", "[logic]" )
       check_status_is(2);
    }
 
+   SECTION("manual switch, no matter what")
+   {
+      WATER_SWITCH = 0;
+      WATER_SWITCH_OFFSET = 1;
+      WATER_LEVEL = -1;
+      
+      run_logic( 0, 20 );
+      REQUIRE( OUT_DEV.set_value_sum == 0 );
+      
+      // manual switch on!
+      MANUAL_SWITCH = 1;
+      run_logic( 0, 20 );
+      REQUIRE( OUT_DEV.set_value_sum == 20 );
+   }
+   
 }
