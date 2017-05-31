@@ -46,8 +46,8 @@ static  void logger_fatal_hook( const char* log_line )
    if ( buffer == NULL || subject == NULL )
       return;
    
-   snprintf( buffer, buffer_len, "Error on %s: %s.\n", CONFIG.hostname, log_line );
-   snprintf( subject, subject_len, "[ESP] %s : error detected", CONFIG.hostname );
+   snprintf( buffer, buffer_len -1, "Error on %s: %s.\n", CONFIG.hostname, log_line );
+   snprintf( subject, subject_len -1, "[ESP] %s : error detected", CONFIG.hostname );
    
    email_send( &CONFIG.email, CONFIG.email.receiver, subject, buffer );
                
@@ -57,19 +57,10 @@ static  void logger_fatal_hook( const char* log_line )
 
 
 
- 
-static void handle_get_devices()
+static int generate_device_json(char* buffer)
 {
-   char* buffer = webserver_get_buffer();
-   int buffer_offset = 0;
-   
-   if ( buffer == NULL )
-      return;
-   
-   
    strcpy( buffer, "{\"dev\":[" );
-   buffer_offset = strlen(buffer);
-   
+   int buffer_offset = strlen(buffer);
    unsigned int loop;
    for ( loop = 0; loop < DEVICES_N; loop ++ )
    {
@@ -91,17 +82,59 @@ static void handle_get_devices()
    
    if ( loop < DEVICES_N ) // exited with break
    {
-      WEBSERVER.send( 500, "application/json", "{\"error\":\"out of buffer\"}");
+      return 0;
    }
    else
    {
       buffer[ buffer_offset - 1 ] = ']';
       buffer[ buffer_offset  ] = '}';
       buffer[ buffer_offset + 1 ] = 0;
-      
-      WEBSERVER.send( 200, "application/json", buffer );
+      return (buffer_offset + 1);
    }
+}
+
+static void handle_get_devices()
+{
+   char* buffer = webserver_get_buffer();
+   int buffer_offset = 0;
+   
+   if ( buffer == NULL )
+      return;
+   
+   int blen = generate_device_json( buffer );
+   
+   if ( blen == 0 )
+      WEBSERVER.send( 500, "application/json", "{\"error\":\"out of buffer\"}");
+   else
+      WEBSERVER.send( 200, "application/json", buffer );
+
    free( buffer );
+}
+
+static void handle_set_email()
+{
+   
+   const int subject_len = 256;
+   char* subject = (char*)malloc( subject_len );
+   char* buffer = (char*)malloc(WEBSERVER_MAX_RESPONSE_SIZE);
+   memset( subject, 0x00, subject_len );
+   memset( buffer, 0x00, WEBSERVER_MAX_RESPONSE_SIZE);
+   
+   snprintf( subject, subject_len, "[ESP] %s : Status report", CONFIG.hostname );
+   int buffer_offset = generate_device_json( buffer );
+   
+   bool ret = email_send( &CONFIG.email, CONFIG.email.receiver, subject, buffer );
+   
+   if ( ret == 0)
+   {
+       WEBSERVER.send( 500, "application/json", "{\"status\":\"error\"}");
+   }
+   else
+   {
+       WEBSERVER.send( 200, "application/json", "{\"status\":\"ok\"}");
+   }
+   free(subject);
+   free(buffer);
 }
 
 static void handle_set_ntp()
@@ -129,6 +162,17 @@ static void handle_set_ntp()
    free(buffer);
 }
 
+void add_password_protected( const char* url, void (*handler)(void)  )
+{
+  
+  char* buffer = (char*)malloc(1024);
+  strcpy( buffer, "/set/" );
+  strcat( buffer, CONFIG.password );
+  strcat( buffer, "/" );
+  strcat( buffer, url );
+  WEBSERVER.on(  buffer , handler );
+  free(buffer);
+}
 
 void setup()
 {
@@ -145,13 +189,9 @@ void setup()
   LOG.set_status( Logger::Status::RUNNING );
   
   WEBSERVER.on( "/get/dev", handle_get_devices );
-  
-  char* buffer = (char*)malloc(1024);
-  strcpy( buffer, "/set/" );
-  strcat( buffer, CONFIG.password );
-  strcat( buffer, "/ntp" );
-  WEBSERVER.on(  buffer , handle_set_ntp );
-  free(buffer);
+  add_password_protected("ntp", handle_set_ntp );
+  add_password_protected("email", handle_set_email );
+
 }
 
 void loop()

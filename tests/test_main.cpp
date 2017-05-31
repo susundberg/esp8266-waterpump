@@ -39,10 +39,10 @@ char* get_buffer()
    return (char*)malloc( WEBSERVER_MAX_RESPONSE_SIZE );
 }
 
-void request_ntp_set()
+void request_set(const char* what)
 {
   
-   std::string url = std::string( "/set/" ) + std::string( CONFIG.password ) + std::string( "/ntp" ) ;
+   std::string url = std::string( "/set/" ) + std::string( CONFIG.password ) + std::string( "/" ) + std::string(what);
    WEBSERVER._test_serve( url.c_str() );
 }
 
@@ -69,23 +69,30 @@ TEST_CASE( "Main test", "[main]" )
    SECTION("password ntp no wifi")
    {
       Platform_ESP8266__connected_fake.return_val = false;
-      request_ntp_set();
+      request_set("ntp");
       REQUIRE( WEBSERVER._test_sent_code == 500 ); 
    }   
    
    
    SECTION("password ntp ok")
    {
-      request_ntp_set();
+      request_set("ntp");
       REQUIRE( WEBSERVER._test_sent_code == 200 ); 
    }
       
    SECTION("password ntp fail")
    {
       ntp_update_fake.return_val = 0;
-      request_ntp_set();
+      request_set("ntp");
       REQUIRE( WEBSERVER._test_sent_code == 500 ); // returns zero == not valid
-      
+   }
+
+   SECTION("password email ")
+   {
+      ntp_update_fake.return_val = 0;
+      email_send_fake.custom_fake = check_email;
+      request_set("email");
+      REQUIRE( WEBSERVER._test_sent_code == 200 ); // returns zero == not valid
    }
    
    SECTION("email hook")

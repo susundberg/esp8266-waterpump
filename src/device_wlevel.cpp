@@ -10,6 +10,7 @@ Device_wlevel::Device_wlevel( const char* name, uint8_t pin_trigger, uint8_t pin
    this->pin_echo = pin_echo;
    this->pin_trigger = pin_trigger;
    this->value = 0;
+   this->nfails = 0;
 }
 
 
@@ -36,15 +37,12 @@ void Device_wlevel::measure_pulse_in()
     
    if (distance == 0 )
    {
+      LOG_WARN("Distance measurement failed (%d row)!", nfails );
       nfails += 1;
-      if ( nfails >= nfail_limit )
-      {
-         LOG_ERROR("Distance sensor is failing.");
-         this->value = 0;
-      }
-      return ; // no update
+      return;
    }
-   
+
+         
    // if the low height is 400mm and distance is 100mm our level is 300mm.
    distance = CONFIG.pump.low_level_height_mm  - distance;
    nfails = 0;
@@ -62,9 +60,20 @@ void Device_wlevel::measure_pulse_in()
 
 void Device_wlevel::loop()
 {
+   if ( nfails >= nfail_limit )
+   {
+      if (nfails == nfail_limit )
+      {  // log the error only once (to avoid spamming..)
+         LOG_FATAL("Distance sensor is failing.");
+         nfails = nfail_limit + 1;
+      }
+      this->value = 0;
+      return ; 
+   }
    
    if ( this->timer.check( measure_interval ) == false )
       return;
+   
    
    this->timer.reset();
    
