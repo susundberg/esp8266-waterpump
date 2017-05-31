@@ -14,7 +14,7 @@ static const int FILTER_LEN = 5;
 
 TEST_CASE( "Basic device ", "[device]" ) 
 {
-   Device_pin_in pin("switch", 12, FILTER_LEN );
+   Device_pin_in pin("switch", 12, FILTER_LEN, false );
    ARDUINO_TEST.hookup();
    ARDUINO_TEST.pin_value[12] = 0;
    pin.setup();
@@ -66,3 +66,23 @@ TEST_CASE( "Basic device ", "[device]" )
        }
     }
 }   
+
+
+TEST_CASE( "Inverted device ", "[device]" ) 
+{
+   Device_pin_in pin("switch", 12, FILTER_LEN, true );
+   ARDUINO_TEST.hookup();
+   ARDUINO_TEST.pin_value[12] = 0;
+   pin.setup();
+
+   SECTION("Filtering works")
+   {
+      ARDUINO_TEST.pin_value[12] = 1;
+      STimer__check_fake.return_val = true;
+      for ( int loop = 0; loop < FILTER_LEN; loop ++ )
+      {
+        pin.loop();
+      }
+      REQUIRE( pin.get_value() == 0 );
+   }
+}     

@@ -9,12 +9,13 @@
 class Device_pin_out : public Device_output
 {
 public:
-   Device_pin_out( const char* name, uint8_t pin, uint8_t value);
+   Device_pin_out( const char* name, uint8_t pin, bool invert );
    virtual void setup(  ) override;  
    virtual void set_value( int value ) override;  
    
 protected:
    uint8_t pin ;
+   bool invert;
 };
 
 

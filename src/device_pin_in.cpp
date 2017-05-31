@@ -3,12 +3,13 @@
 #include <Arduino.h>
 
 
-Device_pin_in::Device_pin_in( const char* name, uint8_t pin, uint8_t filter_len ):
+Device_pin_in::Device_pin_in( const char* name, uint8_t pin, uint8_t filter_len, bool invert ):
 Device_input( name )
 {
    this->pin = pin;
    this->filter_len = filter_len;
    this->filter_sum = 0;
+   this->invert = invert;
    this->value = -1;
 }
 
@@ -25,6 +26,7 @@ void Device_pin_in::loop()
    timer.reset();
    
    int val = digitalRead( this->pin );
+   val = (invert == false) ? (val != 0 ) : ( val == 0 );
    
    this->filter_sum += (val*2 - 1);
    

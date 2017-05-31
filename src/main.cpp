@@ -17,11 +17,11 @@
 
 Device_rtc      DEV_RTC("rtc");
 Device_wlevel   DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO );
-Device_pin_in   DEV_WDETECT("water_detect", PIN_WDETECT, 8 ); // water detect switch
+Device_pin_in   DEV_WDETECT("water_detect", PIN_WDETECT, 4, false ); // water detect switch
 Device_temphum  DEV_TEMP("temperature" );
 Device_temphum  DEV_HUMI("humidity" );
-Device_pin_out  DEV_PUMP("pump", PIN_PUMP, 1 );
-Device_pin_in   DEV_SWITCH("switch", PIN_SWITCH, 8 ); // manual switch
+Device_pin_out  DEV_PUMP("pump", PIN_PUMP, 1 ); // pump inverted, since npn transistor - writing 0 will start the pump
+Device_pin_in   DEV_SWITCH("switch", PIN_SWITCH, 8, true ); // manual switch
 Logic           LOGIC;
 
 Device* const DEVICES[]  = { &DEV_PUMP, &DEV_SWITCH, &DEV_RTC, &DEV_WLEVEL, &DEV_WDETECT, &DEV_TEMP, &DEV_HUMI,  };

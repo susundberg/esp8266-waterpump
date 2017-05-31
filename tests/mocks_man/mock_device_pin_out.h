@@ -8,8 +8,8 @@ This is automatically generate mock file (from /home/pauli/DEV/arduino/water-pum
 #include "fff.h"
 #include "device_pin_out.h"
 
-void Device_pin_out__Device_pin_out(  Device_pin_out*, const char*, uint8_t, uint8_t );
-DECLARE_FAKE_VOID_FUNC( Device_pin_out__Device_pin_out,  Device_pin_out*, const char*, uint8_t, uint8_t );
+void Device_pin_out__Device_pin_out(  Device_pin_out*, const char*, uint8_t, bool );
+DECLARE_FAKE_VOID_FUNC( Device_pin_out__Device_pin_out,  Device_pin_out*, const char*, uint8_t, bool );
 void Device_pin_out__setup(  Device_pin_out* );
 DECLARE_FAKE_VOID_FUNC( Device_pin_out__setup,  Device_pin_out* );
 void Device_pin_out__set_value(  Device_pin_out*, int );

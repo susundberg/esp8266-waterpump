@@ -27,7 +27,7 @@ int Logic::handle_pump(Device_output* output, int water_level, int water_switch,
          // rule 1: we must have water level in high enough (when starting). When pump is running the level will drop.
          if ( water_level <= 0 )
          {
-            LOG_ERROR("Water level too low, pump not started.");
+            LOG_ERROR("Water level too low (%d), pump not started.", water_level );
             pump_status = Pump_status::error;
             return 0;
          }
