@@ -87,13 +87,14 @@ TEST_CASE( "Main test", "[main]" )
       REQUIRE( WEBSERVER._test_sent_code == 500 ); // returns zero == not valid
    }
 
+   /*
    SECTION("password email ")
    {
       ntp_update_fake.return_val = 0;
       email_send_fake.custom_fake = check_email;
       request_set("email");
       REQUIRE( WEBSERVER._test_sent_code == 200 ); // returns zero == not valid
-   }
+   }*/
    
    SECTION("email hook")
    {

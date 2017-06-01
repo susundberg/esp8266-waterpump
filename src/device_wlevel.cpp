@@ -56,6 +56,7 @@ void Device_wlevel::measure_pulse_in()
    
    float ma_new = alpha * distance + (1-alpha) * ma_old;
    this->value = (int)ma_new;
+   LOG_INFO("Distance %d filt:%d", (int)distance, this->value );
 }
 
 void Device_wlevel::loop()
@@ -78,9 +79,9 @@ void Device_wlevel::loop()
    this->timer.reset();
    
    digitalWrite(this->pin_trigger, LOW); 
-   delay( 2 );
+   delayMicroseconds( 2 );
    digitalWrite(this->pin_trigger, HIGH);
-   delay( 10 );
+   delayMicroseconds( 10 );
    digitalWrite(this->pin_trigger, LOW);
    measure_pulse_in();
 }

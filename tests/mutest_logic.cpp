@@ -50,7 +50,7 @@ void check_status_is( int value )
    REQUIRE( LOGIC.jsonify( buffer, 256 ) > 0 );
    
    char target_buffer[256];
-   sprintf(target_buffer, "{\"name\":\"logic\",\"value\":%d}", value );
+   sprintf(target_buffer, "{\"name\":\"pump_status\",\"value\":%d}", value );
    
    std::string target(target_buffer);
    std::string source(buffer);

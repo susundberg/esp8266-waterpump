@@ -126,7 +126,7 @@ void Logger::log( Logger::Level level,  const __FlashStringHelper* format_flash,
 
 void Logger::loop()
 {
-   
+   value = (int)( millis() / 1000 );
    int interval = 4000;
    if ( this->status == Logger::Status::RUNNING )
    {
