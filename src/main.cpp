@@ -24,7 +24,7 @@ Device_pin_out  DEV_PUMP("pump", PIN_PUMP, 1 ); // pump inverted, since npn tran
 Device_pin_in   DEV_SWITCH("switch", PIN_SWITCH, 8, true ); // manual switch
 Logic           LOGIC;
 
-Device* const DEVICES[]  = { &DEV_PUMP, &DEV_SWITCH, &DEV_RTC, &DEV_WLEVEL, &DEV_WDETECT, &DEV_TEMP, &DEV_HUMI,  };
+Device* const DEVICES[]  = {  &DEV_TEMP, &DEV_HUMI, &DEV_WLEVEL, &DEV_WDETECT, &DEV_RTC, &LOG, &LOGIC, &DEV_PUMP, &DEV_SWITCH,   };
 
 #define DEVICES_N (sizeof(DEVICES)/sizeof(Device*))
 
@@ -96,7 +96,6 @@ static int generate_device_json(char* buffer)
 static void handle_get_devices()
 {
    char* buffer = webserver_get_buffer();
-   int buffer_offset = 0;
    
    if ( buffer == NULL )
       return;
@@ -111,6 +110,7 @@ static void handle_get_devices()
    free( buffer );
 }
 
+/* Currently seems to crash the device, due low memory.
 static void handle_set_email()
 {
    
@@ -121,7 +121,7 @@ static void handle_set_email()
    memset( buffer, 0x00, WEBSERVER_MAX_RESPONSE_SIZE);
    
    snprintf( subject, subject_len, "[ESP] %s : Status report", CONFIG.hostname );
-   int buffer_offset = generate_device_json( buffer );
+   generate_device_json( buffer );
    
    bool ret = email_send( &CONFIG.email, CONFIG.email.receiver, subject, buffer );
    
@@ -135,7 +135,7 @@ static void handle_set_email()
    }
    free(subject);
    free(buffer);
-}
+}*/
 
 static void handle_set_ntp()
 {
@@ -190,7 +190,7 @@ void setup()
   
   WEBSERVER.on( "/get/dev", handle_get_devices );
   add_password_protected("ntp", handle_set_ntp );
-  add_password_protected("email", handle_set_email );
+  //add_password_protected("email", handle_set_email );
 
 }
 

@@ -6,7 +6,7 @@ This is automatically generated mock file, see header file for more details.
 
 #include "mock_logger.h"
 DEFINE_FAKE_VOID_FUNC( Logger__Logger,  Logger* );
- Logger::Logger()  { Logger__Logger(  this ); }
+ Logger::Logger() : Device("log") { Logger__Logger(  this ); }
 DEFINE_FAKE_VOID_FUNC( Logger__setup_serial,  Logger*, const char*, int );
 void Logger::setup_serial(const char* hostname, int serial_baudrate)  { Logger__setup_serial(  this, hostname, serial_baudrate ); }
 DEFINE_FAKE_VOID_FUNC( Logger__setup_led,  Logger*, int );

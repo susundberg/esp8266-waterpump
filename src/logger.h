@@ -6,10 +6,11 @@
 
 
 #include "stimer.h"
+#include "device.h"
 
 typedef void (*LoggerFatalHook)(const char* error_line);
 
-class Logger
+class Logger : public Device
 {
    public:
       
@@ -33,7 +34,7 @@ class Logger
      /// @returns pointer to given line or NULL if not that many lines.
      const char* get_log_line( int line_number );
      
-     void loop(); // blink led if defined
+     virtual void loop() override; // blink led if defined
      
   private:
      STimer led_timer;

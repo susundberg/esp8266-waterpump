@@ -3,7 +3,7 @@
 #include "logger.h"
 
 
-Logic::Logic()  : Device("logic")
+Logic::Logic()  : Device("pump_status")
 {
    pump_status = Pump_status::stopped;
    timer.reset();

@@ -10,7 +10,7 @@
 
 Logger LOG;
 
-Logger::Logger()
+Logger::Logger() : Device("uptime")
 {
    this->status=Status::BOOTING;
    this->led_pin = -1;
@@ -82,7 +82,7 @@ void Logger::log( Logger::Level level,  const __FlashStringHelper* format_flash,
    
    memset(buf, 0x00, max_line_len );
    // make the level visible
-   const char log_level_desc[] = {'D','I','W','E'};
+   const char log_level_desc[] = { 'D','I','W','E', 'F' };
    
    InfoUptime uptime;
    get_uptime(&uptime);
