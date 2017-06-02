@@ -10,7 +10,7 @@
 
 Logger LOG;
 
-Logger::Logger() : Device("uptime")
+Logger::Logger() 
 {
    this->status=Status::BOOTING;
    this->led_pin = -1;
@@ -126,7 +126,6 @@ void Logger::log( Logger::Level level,  const __FlashStringHelper* format_flash,
 
 void Logger::loop()
 {
-   value = (int)( millis() / 1000 );
    int interval = 4000;
    if ( this->status == Logger::Status::RUNNING )
    {

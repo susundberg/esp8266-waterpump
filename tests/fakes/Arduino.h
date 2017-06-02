@@ -65,6 +65,7 @@ int analogRead(uint8_t);
 unsigned long millis();
 void analogWrite(uint8_t, int);
 void delay(unsigned long);
+void delayMicroseconds(unsigned long);
 unsigned long pulseIn( uint8_t, uint8_t value, uint8_t timeout );
 
 DECLARE_FAKE_VOID_FUNC( pinMode, uint8_t, uint8_t );
@@ -74,6 +75,7 @@ DECLARE_FAKE_VALUE_FUNC( unsigned long, millis );
 DECLARE_FAKE_VALUE_FUNC( int, analogRead, uint8_t );
 DECLARE_FAKE_VOID_FUNC( analogWrite, uint8_t, int );
 DECLARE_FAKE_VOID_FUNC( delay, unsigned long );
+DECLARE_FAKE_VOID_FUNC( delayMicroseconds, unsigned long );
 DECLARE_FAKE_VALUE_FUNC( unsigned long, pulseIn, uint8_t, uint8_t, unsigned long );
 
 

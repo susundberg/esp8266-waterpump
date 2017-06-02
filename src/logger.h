@@ -10,7 +10,7 @@
 
 typedef void (*LoggerFatalHook)(const char* error_line);
 
-class Logger : public Device
+class Logger
 {
    public:
       
@@ -34,7 +34,7 @@ class Logger : public Device
      /// @returns pointer to given line or NULL if not that many lines.
      const char* get_log_line( int line_number );
      
-     virtual void loop() override; // blink led if defined
+     void loop();
      
   private:
      STimer led_timer;

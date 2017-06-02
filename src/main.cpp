@@ -2,6 +2,7 @@
 
 #include "config.h"
 
+#include "serial.h"
 #include "email_send.h"
 #include "logger.h"
 #include "webserver.h"
@@ -14,6 +15,7 @@
 #include "device_pin_in.h"
 #include "device_pin_out.h"
 #include "logic.h"
+#include "push_thingspeak.h"
 
 Device_rtc      DEV_RTC("rtc");
 Device_wlevel   DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO );
@@ -23,8 +25,27 @@ Device_temphum  DEV_HUMI("humidity" );
 Device_pin_out  DEV_PUMP("pump", PIN_PUMP, 1 ); // pump inverted, since npn transistor - writing 0 will start the pump
 Device_pin_in   DEV_SWITCH("switch", PIN_SWITCH, 8, true ); // manual switch
 Logic           LOGIC;
+Push_thingspeak PUSH;
 
-Device* const DEVICES[]  = {  &DEV_TEMP, &DEV_HUMI, &DEV_WLEVEL, &DEV_WDETECT, &DEV_RTC, &LOG, &LOGIC, &DEV_PUMP, &DEV_SWITCH,   };
+/** Make some artificial devices for more information */
+class Device_uptime : public Device_input
+{
+   public:
+     Device_uptime() : Device_input("uptime") {};
+     virtual void loop() override { this->value = millis()/1000; } ;
+};
+
+class Device_status : public Device_input
+{
+   public:
+     Device_status() : Device_input("status") {};
+     virtual void loop() override { this->value = (int)LOG.get_status(); } ;
+};
+
+Device_uptime DEV_UPTIME;
+Device_status DEV_STATUS;
+
+Device* const DEVICES[]  = {  &DEV_TEMP, &DEV_HUMI, &DEV_WLEVEL, &DEV_WDETECT, &DEV_RTC, &DEV_UPTIME, &DEV_STATUS, &DEV_PUMP, &DEV_SWITCH,   };
 
 #define DEVICES_N (sizeof(DEVICES)/sizeof(Device*))
 
@@ -110,10 +131,9 @@ static void handle_get_devices()
    free( buffer );
 }
 
-/* Currently seems to crash the device, due low memory.
-static void handle_set_email()
+static bool handle_set_email()
 {
-   
+   LOG_INFO("Status email requested.");
    const int subject_len = 256;
    char* subject = (char*)malloc( subject_len );
    char* buffer = (char*)malloc(WEBSERVER_MAX_RESPONSE_SIZE);
@@ -121,46 +141,48 @@ static void handle_set_email()
    memset( buffer, 0x00, WEBSERVER_MAX_RESPONSE_SIZE);
    
    snprintf( subject, subject_len, "[ESP] %s : Status report", CONFIG.hostname );
-   generate_device_json( buffer );
-   
+   int blen = generate_device_json( buffer );
+   serial_print_raw( buffer, blen, true );
    bool ret = email_send( &CONFIG.email, CONFIG.email.receiver, subject, buffer );
    
-   if ( ret == 0)
-   {
-       WEBSERVER.send( 500, "application/json", "{\"status\":\"error\"}");
-   }
-   else
-   {
-       WEBSERVER.send( 200, "application/json", "{\"status\":\"ok\"}");
-   }
    free(subject);
    free(buffer);
-}*/
+   return ret;
+}
 
-static void handle_set_ntp()
+static bool handle_set_ntp()
 {
-   
-   if ( PLATFORM.connected() == false )
-   {
-      WEBSERVER.send( 500, "application/json", "{\"error\":\"no wifi\"}" );
-      return;
-   }
-   
-   LOG_INFO("NTP time requested.");
    uint32_t ntp_time = ntp_update();
-   
    if ( ntp_time == 0 )
    {
-      WEBSERVER.send( 500, "application/json", "{\"error\":\"update failed\"}" );
-      return;
+      return false;
    }
-   
    DEV_RTC.update_time( ntp_time );
+   return true;
+}
+
+static bool handle_set_push()
+{
+   LOG_INFO("Data push requested.");
+   bool ret = PUSH.thingspeak_push( (const Device_input**)DEVICES, 7, true );
+   return ret;
+}
+
+static void handle_http( bool ret )
+{
    char* buffer = webserver_get_buffer();
-   snprintf( buffer, WEBSERVER_MAX_RESPONSE_SIZE, "{\"time_now\":%u}", (unsigned int)ntp_time );
-   WEBSERVER.send( 200, "application/json", buffer );
+   if (buffer == NULL)
+      return;
+   
+   int resp_code  = (ret == true) ? 200 : 500;
+   const char* code = (ret == true) ? "ok" : "err";
+   
+   snprintf( buffer,  WEBSERVER_MAX_RESPONSE_SIZE, "{\"status\":\"%s\"}", code );
+   WEBSERVER.send( resp_code , "application/json",  buffer );
    free(buffer);
 }
+
+
 
 void add_password_protected( const char* url, void (*handler)(void)  )
 {
@@ -189,15 +211,41 @@ void setup()
   LOG.set_status( Logger::Status::RUNNING );
   
   WEBSERVER.on( "/get/dev", handle_get_devices );
-  add_password_protected("ntp", handle_set_ntp );
-  //add_password_protected("email", handle_set_email );
+  add_password_protected("ntp", []{ handle_http(handle_set_ntp()); } );
+  add_password_protected("push",[]{ handle_http(handle_set_push()); });
+  //out of memory: add_password_protected("email", handle_set_email );
 
 }
+
+void handle_serial()
+{
+    int line_len;
+    char* line = serial_receive( &line_len );
+    
+    if ( line == NULL )
+       return;
+    
+    LOG_WARN("Serial: %s ", line );
+
+    if ( strcmp(line, "email") == 0 )
+    {
+       handle_set_email();
+    }
+    else if ( strcmp(line, "push") == 0 )
+    {
+       handle_set_push();
+    }
+    else
+    {
+       serial_print( "Invalid command\n");
+    }
+} 
 
 void loop()
 {
    
    LOG.loop();
+   handle_serial();
    
    static unsigned long avail_memory_last = 0xFFFF;
    unsigned long avail_memory_now = PLATFORM.get_free_heap();
@@ -208,22 +256,27 @@ void loop()
       avail_memory_last = avail_memory_now;
    }
    
-  
+   
    webserver_loop();
    PLATFORM.loop();
    
    delay(10);
    
-   if ( LOG.get_status() != Logger::Status::RUNNING )
-      return;
    
    for ( unsigned int loop = 0; loop < DEVICES_N; loop ++ )
      DEVICES[loop]->loop();
    
    Config_run_table_time time_now;
    DEV_RTC.time_of_day( &time_now );
-   LOGIC.run_logic( &time_now, &DEV_PUMP, DEV_WLEVEL.get_value(), DEV_WLEVEL.get_value(), DEV_SWITCH.get_value() );
    
+   if ( LOG.get_status() == Logger::Status::RUNNING )
+   {
+      LOGIC.run_logic( &time_now, &DEV_PUMP, DEV_WLEVEL.get_value(), DEV_WDETECT.get_value(), DEV_SWITCH.get_value() );
+   }
+   
+   PUSH.thingspeak_push( (const Device_input**)DEVICES, 7, false );
+  
+
 }
 
 

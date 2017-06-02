@@ -8,8 +8,8 @@
 
 
 
-
-class Logic : public Device
+/** The main logic, its not really a device, but lets use it as such, since that we we can easily get a value out of it */
+class Logic 
 {
   
    public:
@@ -22,7 +22,7 @@ class Logic : public Device
    protected:
       int handle_pump(  Device_output* output, int water_level, int water_switch, int period_time );
       
-      enum class Pump_status  { stopped, running, error };
+      enum class Pump_status  { stopped, running };
       static const int poll_interval = 1000;
       
       STimer timer;

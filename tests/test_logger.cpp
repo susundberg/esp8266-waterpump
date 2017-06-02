@@ -73,9 +73,12 @@ TEST_CASE( "Logging ", "[logger]" )
    {
       LOG = Logger();
       
+      LOG_FATAL("OK");
       LOG_ERROR("OK");
       LOG_WARN("OK" );
+      
       REQUIRE( std::string( LOG.get_log_line(0) ) == "[32:15:45] W:OK" );
       REQUIRE( std::string( LOG.get_log_line(1) ) == "[32:15:45] E:OK" );
+      REQUIRE( std::string( LOG.get_log_line(2) ) == "[32:15:45] F:OK" );
    }
 }   

@@ -52,22 +52,21 @@ bool read_response(WiFiClientSecure* client, char* buffer, int buffer_len, const
   
   // Uncomment this if you want to see the full response always
   //  Serial.println(buffer);
-  
-  if ( buffer_offset < 3 || buffer_offset >= EMAIL_SEND_MAX_SIZE )
+  int exp_size = strlen(exp_response);
+  if ( buffer_offset < exp_size || buffer_offset >= EMAIL_SEND_MAX_SIZE )
   {
      LOG_WARN("Send failed (len) at '%s'", log_string );
      LOG_WARN("Got: '%s'", buffer );
      return false;
   }
   
-  if ( strncmp( buffer, exp_response, strlen(exp_response) ) != 0 )
+  if ( strncmp( buffer, exp_response, exp_size ) != 0 )
   {
      LOG_WARN("Send failed (content) at '%s'", log_string );
      LOG_WARN("Got: '%s'", buffer );
      return false;
   }
   return true;
-  
 }
 
 bool email_send_raw( const Config_email* settings, const char* receiver, const char* subject, const char* message, 
@@ -131,6 +130,7 @@ bool email_send_raw( const Config_email* settings, const char* receiver, const c
   if( read_response( client, buffer, EMAIL_SEND_MAX_SIZE, "\n", FSTR("250"), FSTR("quit") ) == false )
      return false;
   
+  LOG_INFO("Message sent ok!");
   return true;
 }
 

@@ -66,13 +66,6 @@ TEST_CASE( "Main test", "[main]" )
       std::cout << WEBSERVER._test_sent_content << "\n";
    }
    
-   SECTION("password ntp no wifi")
-   {
-      Platform_ESP8266__connected_fake.return_val = false;
-      request_set("ntp");
-      REQUIRE( WEBSERVER._test_sent_code == 500 ); 
-   }   
-   
    
    SECTION("password ntp ok")
    {

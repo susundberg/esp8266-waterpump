@@ -9,6 +9,7 @@ DEFINE_FAKE_VALUE_FUNC( int, digitalRead, uint8_t );
 DEFINE_FAKE_VALUE_FUNC( int, analogRead, uint8_t );
 DEFINE_FAKE_VOID_FUNC( analogWrite, uint8_t, int );
 DEFINE_FAKE_VOID_FUNC( delay, unsigned long );
+DEFINE_FAKE_VOID_FUNC( delayMicroseconds, unsigned long );
 DEFINE_FAKE_VALUE_FUNC( unsigned long, millis );
 DEFINE_FAKE_VALUE_FUNC( unsigned long, pulseIn, uint8_t, uint8_t, uint8_t );
 

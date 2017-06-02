@@ -44,12 +44,19 @@ struct Config_pump
    uint8_t threshold_water_up_s ;
 };
 
+struct Config_push
+{
+   const char* host;
+   const char* api_key; 
+};
+
 struct Config
 {
    Config_email email;
    Config_wlan  wlan;
    Config_run_table runtable;
    Config_pump pump;
+   Config_push push;
    const char* hostname;
    const char* password;
 };

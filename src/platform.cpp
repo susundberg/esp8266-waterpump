@@ -101,12 +101,7 @@ void Platform_ESP8266::setup_ota()
   });
   
   ArduinoOTA.onError([](ota_error_t error) {
-    LOG_ERROR("Error %u during update: ", error);
-    if (error == OTA_AUTH_ERROR) LOG_ERROR("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) LOG_ERROR("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) LOG_ERROR("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) LOG_ERROR("Receive Failed");
-    else if (error == OTA_END_ERROR) LOG_ERROR("End Failed");
+    LOG_FATAL("Error %u during update: ", error);
   });
   ArduinoOTA.begin();
 }
@@ -125,7 +120,7 @@ void Platform_ESP8266::setup_fs()
   }
   else
   {
-    LOG_ERROR("FS mounting failed!");    
+    LOG_FATAL("FS mounting failed!");    
   }
 }
 

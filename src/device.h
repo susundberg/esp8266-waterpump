@@ -26,8 +26,10 @@ public:
    Device_input( const char* name );
   
    /// @returns sensor current reading
-   int get_value() ;
-   
+   int get_value() const;
+protected:
+   // update value with extra print
+   void update_value(int new_value);
 };
 
 

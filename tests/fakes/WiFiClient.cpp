@@ -1,11 +1,11 @@
 #include <iostream>
 
-#include "WiFiClientSecure.h"
+#include "WiFiClient.h"
 
-std::list<WiFiClientSecure*> WiFiClientSecure::_test_clients;
-std::function<void(WiFiClientSecure*)> WiFiClientSecure::_test_create_hook = NULL;
+std::list<WiFiClient*> WiFiClient::_test_clients;
+std::function<void(WiFiClient*)> WiFiClient::_test_create_hook = NULL;
 
-WiFiClientSecure::WiFiClientSecure()
+WiFiClient::WiFiClient()
 {
    _test_verbose = false;
    _test_clients.push_front( this );
@@ -14,13 +14,13 @@ WiFiClientSecure::WiFiClientSecure()
       _test_create_hook( this );
 }
 
-WiFiClientSecure::~WiFiClientSecure()
+WiFiClient::~WiFiClient()
 {
    _test_clients.remove( this );
 }
 
 
-int WiFiClientSecure::available()
+int WiFiClient::available()
 {
    int len = 0;
    for (const String& str : _test_input ) 
@@ -30,12 +30,12 @@ int WiFiClientSecure::available()
    return len;
 }
 
-int WiFiClientSecure::connect(const char* name, uint16_t port)
+int WiFiClient::connect(const char* name, uint16_t port)
 {
    return 1;
 }
 
-int WiFiClientSecure::read(uint8_t *buf, size_t size) 
+int WiFiClient::read(uint8_t *buf, size_t size) 
 {
    
    if ( _test_input_current.length() == 0 )
@@ -58,17 +58,17 @@ int WiFiClientSecure::read(uint8_t *buf, size_t size)
 
 
 
-void WiFiClientSecure::setTimeout( int timeout )
+void WiFiClient::setTimeout( int timeout )
 {
    
 }
 
-void WiFiClientSecure::stop()
+void WiFiClient::stop()
 {
    
 }
 
-void WiFiClientSecure::println( const String& what )
+void WiFiClient::println( const String& what )
 {
    _test_output.push_front( what );
    
@@ -76,12 +76,19 @@ void WiFiClientSecure::println( const String& what )
       std::cout << "Client " << this << " : " << what  << "\n";
 }
 
-IPAddress WiFiClientSecure::localIP()
+void WiFiClient::write( const uint8_t* buffer, size_t buffer_n )
+{
+   std::string str;
+   str.assign( (const char*)buffer, buffer_n );
+   println( str );
+}
+
+IPAddress WiFiClient::localIP()
 {
    return IPAddress();
 }
 
-void WiFiClientSecure::_test_reset()
+void WiFiClient::_test_reset()
 {
    _test_input_current = String();
    _test_input.clear();

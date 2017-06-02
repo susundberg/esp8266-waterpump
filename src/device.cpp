@@ -29,6 +29,16 @@ Device_output::Device_output( const char* name )
 {
 }
 
+void Device_input::update_value(int new_value)
+{
+   if ( value == new_value )
+      return;
+   
+   this->value = new_value;
+   LOG_INFO("Dev %s: value changed to %d", this->name, value );
+}
+
+
 int Device::jsonify( char* buffer, int buffer_len )
 {
    int len = snprintf( buffer, buffer_len, "{\"name\":\"%s\",\"value\":%d}", name, value );
@@ -40,7 +50,7 @@ int Device::jsonify( char* buffer, int buffer_len )
    return len;
 }
 
-int Device_input::get_value() 
+int Device_input::get_value() const
 {
    return value;
 }

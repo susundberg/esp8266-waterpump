@@ -32,7 +32,8 @@ void Device_pin_in::loop()
    
    if ( this->filter_sum > filter_len / 2 )
    {
-      this->value = 1;
+      this->update_value( 1 );
+      
       if ( this->filter_sum > filter_len )
       {
          this->filter_sum = filter_len ;
@@ -40,7 +41,8 @@ void Device_pin_in::loop()
    }
    else if ( this->filter_sum < -(filter_len/2) )
    {
-      this->value = 0;
+      this->update_value( 0 );
+      
       if ( this->filter_sum < -filter_len )
       {
          this->filter_sum = -filter_len ;
@@ -48,6 +50,6 @@ void Device_pin_in::loop()
    }
    else
    {
-      this->value = -1;
+      this->update_value( -1 );
    }
 }

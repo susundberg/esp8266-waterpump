@@ -3,7 +3,7 @@
 #include "logger.h"
 
 
-Logic::Logic()  : Device("pump_status")
+Logic::Logic() 
 {
    pump_status = Pump_status::stopped;
    timer.reset();
@@ -27,16 +27,14 @@ int Logic::handle_pump(Device_output* output, int water_level, int water_switch,
          // rule 1: we must have water level in high enough (when starting). When pump is running the level will drop.
          if ( water_level <= 0 )
          {
-            LOG_ERROR("Water level too low (%d), pump not started.", water_level );
-            pump_status = Pump_status::error;
+            LOG_FATAL("Water level too low (%d), pump not started.", water_level );
             return 0;
          }
          
          // rule 2: the water switch must be in neutral position (or its stuck)
          if ( water_switch != 0 )
          {
-            LOG_ERROR("Water switch still active, pump not started.");
-            pump_status = Pump_status::error;
+            LOG_FATAL("Water switch still active, pump not started.");
             return 0;
          }
          
@@ -50,8 +48,7 @@ int Logic::handle_pump(Device_output* output, int water_level, int water_switch,
          {
             if ( water_switch != 1 )
             {
-               LOG_ERROR("Water switch not active, even pump started.");
-               pump_status = Pump_status::error;
+               LOG_FATAL("Water switch not active, even pump started.");
                return 0;
             }
          }
@@ -66,9 +63,8 @@ int Logic::handle_pump(Device_output* output, int water_level, int water_switch,
 
 void Logic::run_logic( const Config_run_table_time* time_now, Device_output* output, int water_level, int water_switch, int manual_switch)
 {
-   
-   value = (int) pump_status;
-   
+   static bool print_done = false;
+
    if ( timer.check( poll_interval ) == false )
       return;
    
@@ -81,13 +77,12 @@ void Logic::run_logic( const Config_run_table_time* time_now, Device_output* out
    // first check if we are driving manual mode
    if ( manual_switch == 1 ) 
    {
+      if( print_done == false )
+      {
+         LOG_INFO("Pump manual start" );
+         print_done = true;
+      }
       output->set_value(1);
-      return;
-   }
-   
-   if ( pump_status == Pump_status::error ) 
-   {
-      output->set_value(0);
       return;
    }
    
@@ -110,12 +105,24 @@ void Logic::run_logic( const Config_run_table_time* time_now, Device_output* out
       
       if (pump_should_be_on == true ) 
       {
+         
+         if( print_done == false )
+         {
+            LOG_INFO("Pump starttime: %d %d", water_level, water_switch );
+            print_done = true;
+         }
+         
          pump_running = Logic::handle_pump( output, water_level, water_switch, period_rel );
       }
       else
       {
+         print_done = false;
          pump_status = Pump_status::stopped;
       }
+   }
+   else
+   {
+      print_done = false;
    }
    
    output->set_value(pump_running);

@@ -24,6 +24,10 @@ const Config CONFIG = {
       .low_level_height_mm  = 400,
       .threshold_water_up_s = 10,
    },
+   .push = {
+      .host = "api.thingspeak.com",
+      .api_key = "APIKEYHERE"
+   },
    .hostname = "waterpump",
    .password = "waterize"
 };

@@ -79,9 +79,10 @@ void serial_print( const char* format, ... )
    va_list arg_list;
    va_start(arg_list, format);
    memset( BUFFER, 0x00, sizeof(BUFFER));
-   int ret = vsnprintf( BUFFER,  BUFFER_SIZE, format, arg_list );
+   int ret = vsnprintf( BUFFER,  BUFFER_SIZE - 1, format, arg_list );
    va_end(arg_list);
-   Serial.write( BUFFER, ret ); 
+   int buffer_len = min( ret, BUFFER_SIZE );
+   Serial.write( BUFFER, buffer_len ); 
 }
 
 int serial_receive_number(int min_value, int max_value)
