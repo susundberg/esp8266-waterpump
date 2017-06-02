@@ -125,7 +125,7 @@ void Logic::run_logic( const Config_run_table_time* time_now, Device_output* out
       print_done = false;
    }
    
-   output->set_value(pump_running);
+   output->set_value(pump_running, true );
    
 }
 

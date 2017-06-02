@@ -182,7 +182,21 @@ static void handle_http( bool ret )
    free(buffer);
 }
 
-
+void handle_get_time()
+{
+   Config_run_table_time time;
+   char* buffer = webserver_get_buffer();
+   if (buffer == NULL)
+      return;
+   
+   DEV_RTC.time_of_day( &time );
+   
+   snprintf( buffer,  WEBSERVER_MAX_RESPONSE_SIZE, "{\"hour\":%d,\"min\":%d,\"sec\":%d}", 
+             time.hour, time.minute, time.second );
+   WEBSERVER.send( 200 , "application/json",  buffer );
+   free(buffer);
+   
+}
 
 void add_password_protected( const char* url, void (*handler)(void)  )
 {
@@ -211,6 +225,7 @@ void setup()
   LOG.set_status( Logger::Status::RUNNING );
   
   WEBSERVER.on( "/get/dev", handle_get_devices );
+  WEBSERVER.on( "/get/time", handle_get_time );
   add_password_protected("ntp", []{ handle_http(handle_set_ntp()); } );
   add_password_protected("push",[]{ handle_http(handle_set_push()); });
   //out of memory: add_password_protected("email", handle_set_email );

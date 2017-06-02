@@ -1,5 +1,6 @@
 #include "device_pin_out.h"
 
+#include "logger.h"
 #include <Arduino.h>
 
 Device_pin_out::Device_pin_out( const char* name, uint8_t pin, bool invert ) :
@@ -17,10 +18,15 @@ void Device_pin_out::setup( )
 }
 
 
-void Device_pin_out::set_value( int value ) 
+void Device_pin_out::set_value( int value, bool verbose ) 
 {
    bool write_value = (invert == false) ? (value != 0) : (value == 0);
    digitalWrite( this->pin, write_value );
+   
+   if ( this->value != value && verbose )
+   {
+      LOG_INFO("Device '%s' status now: %d", this->name, value );
+   }
    this->value = value;
 }
 

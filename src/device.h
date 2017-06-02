@@ -38,7 +38,8 @@ class Device_output: public Device
    
 public:
    Device_output( const char* name );
-   virtual void set_value( int value ) = 0;
+   /// @param value new value, @param verbose if set to true then will have log print if value changed
+   virtual void set_value( int value, bool verbose=false ) = 0;
   
 };
 

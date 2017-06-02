@@ -29,7 +29,8 @@ const Config CONFIG = {
       .api_key = "APIKEYHERE"
    },
    .hostname = "waterpump",
-   .password = "waterize"
+   .password = "waterize",
+   .timezone_h = 3,
 };
 
 

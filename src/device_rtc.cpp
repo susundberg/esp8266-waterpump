@@ -35,7 +35,7 @@ void Device_rtc::time_of_day(Config_run_table_time* time)
 {
    DateTime now( value );
    
-   time->hour = now.hour();
+   time->hour   = (now.hour()  + CONFIG.timezone_h)%24;
    time->minute = now.minute();
    time->second = now.second();
 }

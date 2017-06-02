@@ -10,5 +10,5 @@ DEFINE_FAKE_VOID_FUNC( Device_pin_out__Device_pin_out,  Device_pin_out*, const c
 DEFINE_FAKE_VOID_FUNC( Device_pin_out__setup,  Device_pin_out* );
 void Device_pin_out::setup()  { Device_pin_out__setup(  this ); }
 DEFINE_FAKE_VOID_FUNC( Device_pin_out__set_value,  Device_pin_out*, int );
-void Device_pin_out::set_value(int value)  { Device_pin_out__set_value(  this, value ); }
+void Device_pin_out::set_value(int value, bool verbose)  { Device_pin_out__set_value(  this, value ); }
 

@@ -66,6 +66,12 @@ TEST_CASE( "Main test", "[main]" )
       std::cout << WEBSERVER._test_sent_content << "\n";
    }
    
+   SECTION("serve time")
+   {
+      WEBSERVER._test_serve("/get/time");
+      REQUIRE( WEBSERVER._test_sent_code == 200 );
+      std::cout << WEBSERVER._test_sent_content << "\n";
+   }
    
    SECTION("password ntp ok")
    {

@@ -16,7 +16,7 @@ class TEST_Device : public Device_output
 {
    public:
    TEST_Device() : Device_output("testdev") { set_value_sum = 0; set_value_now = -1; };
-   void set_value( int value ) { set_value_sum += value; set_value_now = value; }
+   virtual void set_value( int value, bool verbose=false ) override { set_value_sum += value; set_value_now = value; } 
    
    int set_value_sum;
    int set_value_now;

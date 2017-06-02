@@ -59,6 +59,7 @@ struct Config
    Config_push push;
    const char* hostname;
    const char* password;
+   uint8_t     timezone_h;
 };
 
 

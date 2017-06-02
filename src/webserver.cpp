@@ -93,7 +93,7 @@ static void handle_status()
    get_uptime(&uptime);
    
    
-   snprintf( buffer, WEBSERVER_MAX_RESPONSE_SIZE, "{ \"status\":\"%s\",\"uptime\":\"%u hours %u minutes %u seconds\" }", 
+   snprintf( buffer, WEBSERVER_MAX_RESPONSE_SIZE, "{ \"status\":\"%s\",\"hour\":%u,\"min\":%u,\"sec\":%u}", 
              status, uptime.hours, uptime.minutes, uptime.seconds  );
    
    WEBSERVER.send( 200, "application/json", buffer );
