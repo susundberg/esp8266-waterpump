@@ -55,8 +55,14 @@ void Device_wlevel::measure_pulse_in()
    }
    
    float ma_new = alpha * distance + (1-alpha) * ma_old;
-   this->value = (int)ma_new;
-   LOG_INFO("Distance %d filt:%d", (int)distance, this->value );
+   
+   int new_value = (int)ma_new;
+   
+   if ( this->value != new_value )
+   {
+      LOG_INFO("Distance %d filt:%d", (int)distance, this->value );
+   }
+   this->value = new_value;
 }
 
 void Device_wlevel::loop()

@@ -138,6 +138,15 @@ bool email_send_raw( const Config_email* settings, const char* receiver, const c
 
 bool email_send( const Config_email* settings, const char* receiver, const char* subject, const char* message )
 {
+  static int spam_protection = EMAIL_SEND_MAX_MAILS;
+  
+  if ( spam_protection <= 0 )
+  {
+     LOG_WARN("Email '%s' send skipped since quota out.\n");
+     return false;
+  }
+  spam_protection -= 1;
+  
   char* buffer = (char*)malloc( EMAIL_SEND_MAX_SIZE ); 
   WiFiClientSecure* client = new WiFiClientSecure();
   
