@@ -1,4 +1,4 @@
-#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
 
 
 #include "config.h"
@@ -13,8 +13,8 @@ Push_thingspeak::Push_thingspeak()
 
 bool Push_thingspeak::thingspeak_push_raw(const Device_input** values, int values_n, char* buffer )
 {
-   WiFiClient client;
-   if ( client.connect( CONFIG.push.host, 80 ) == false )
+   WiFiClientSecure client;
+   if ( client.connect( CONFIG.push.host, 443 ) == false )
    {
      LOG_WARN("Cannot connect '%s'", CONFIG.push.host );
      return false;
