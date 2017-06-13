@@ -19,7 +19,7 @@
 
 Device_rtc      DEV_RTC("rtc");
 Device_wlevel   DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO );
-Device_pin_in   DEV_WDETECT("water_detect", PIN_WDETECT, 4, false ); // water detect switch
+Device_pin_in   DEV_WDETECT("water_detect", PIN_WDETECT, 4, true ); // water detect switch - when its physically low, its open -> high
 Device_temphum  DEV_TEMP("temperature" );
 Device_temphum  DEV_HUMI("humidity" );
 Device_pin_out  DEV_PUMP("pump", PIN_PUMP, 1 ); // pump inverted, since npn transistor - writing 0 will start the pump
@@ -45,7 +45,7 @@ class Device_status : public Device_input
 Device_uptime DEV_UPTIME;
 Device_status DEV_STATUS;
 
-Device* const DEVICES[]  = {  &DEV_TEMP, &DEV_HUMI, &DEV_WLEVEL, &DEV_WDETECT, &DEV_RTC, &DEV_UPTIME, &DEV_STATUS, &DEV_PUMP, &DEV_SWITCH,   };
+Device* const DEVICES[]  = {  &DEV_TEMP, &DEV_HUMI, &DEV_WLEVEL, &DEV_WDETECT, &DEV_PUMP, &DEV_UPTIME, &DEV_RTC, &DEV_STATUS, &DEV_SWITCH,   };
 
 #define DEVICES_N (sizeof(DEVICES)/sizeof(Device*))
 
@@ -131,6 +131,16 @@ static void handle_get_devices()
    free( buffer );
 }
 
+static bool handle_push_devices(bool force)
+{
+   int values[6];
+   for ( unsigned int loop = 0; loop < 6; loop ++ )
+      values[loop] = DEVICES[loop]->get_value();
+   return PUSH.thingspeak_push( (const int*)values, 0, 6, force );
+}
+
+
+
 static bool handle_set_email()
 {
    LOG_INFO("Status email requested.");
@@ -164,8 +174,7 @@ static bool handle_set_ntp()
 static bool handle_set_push()
 {
    LOG_INFO("Data push requested.");
-   bool ret = PUSH.thingspeak_push( (const Device_input**)DEVICES, 7, true );
-   return ret;
+   return handle_push_devices( true );
 }
 
 static void handle_http( bool ret )
@@ -256,6 +265,7 @@ void handle_serial()
     }
 } 
 
+
 void loop()
 {
    
@@ -284,13 +294,31 @@ void loop()
    Config_run_table_time time_now;
    DEV_RTC.time_of_day( &time_now );
    
-   if ( LOG.get_status() == Logger::Status::RUNNING )
-   {
-      LOGIC.run_logic( &time_now, &DEV_PUMP, DEV_WLEVEL.get_value(), DEV_WDETECT.get_value(), DEV_SWITCH.get_value() );
-   }
+   bool logic_changed = LOGIC.run_logic( &time_now, &DEV_PUMP, DEV_WLEVEL.get_value(), DEV_WDETECT.get_value(), DEV_SWITCH.get_value() );
    
-   PUSH.thingspeak_push( (const Device_input**)DEVICES, 7, false );
-  
+   if ( logic_changed )
+   {
+      LogicStatus status = LOGIC.get_status();
+      
+      // if new status is idle, then we were pumping -> push the delays (assuming valid)
+      if ( status == LogicStatus::idle )
+      {
+         int delays[2];
+         bool valid = LOGIC.get_measurements( delays );
+         if (valid )
+         {
+            PUSH.thingspeak_push( (const int*)delays, 6, 2, true );
+         }
+      }
+      else if ( status == LogicStatus::pump_started || status == LogicStatus::draining )
+      {
+         handle_push_devices( true );
+      }
+   }
+   else
+   {
+      handle_push_devices( false );
+   }
 
 }
 

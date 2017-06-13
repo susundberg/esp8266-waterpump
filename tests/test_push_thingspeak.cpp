@@ -3,21 +3,17 @@
 #include "Arduino.h"
 
 #include "push_thingspeak.h"
-#include "mock_device_pin_in.h"
+#include "WiFiClient.h"
 
 TEST_CASE( "Basic push", "[push]" ) 
 {
    
-   Device_pin_in_FAKE   DEV1(1 ); 
-   Device_pin_in_FAKE   DEV2(5 ); 
-   Device_pin_in_FAKE   DEV3(10); 
-   
    Push_thingspeak PUSH;
-
-   Device* const DEVICES[]  = {  &DEV1, &DEV2, &DEV3 };
+   WiFiClient::_test_verbose = true;
    
-   PUSH.thingspeak_push( (const Device_input**) DEVICES, 3, true );
-
- 
+   int values[6] = { 0,1,2,3,4,5 };
+   int values2[3] = { 5,7,8 };
+   PUSH.thingspeak_push( values,0, 6, true );
+   PUSH.thingspeak_push( values2,3, 3, true );
    
 }

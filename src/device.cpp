@@ -50,7 +50,7 @@ int Device::jsonify( char* buffer, int buffer_len )
    return len;
 }
 
-int Device_input::get_value() const
+int Device::get_value() const
 {
    return value;
 }

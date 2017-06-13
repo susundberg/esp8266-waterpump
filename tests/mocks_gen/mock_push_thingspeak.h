@@ -10,9 +10,9 @@ This is automatically generate mock file (from /home/pauli/DEV/arduino/water-pum
 
 void Push_thingspeak__Push_thingspeak(  Push_thingspeak* );
 DECLARE_FAKE_VOID_FUNC( Push_thingspeak__Push_thingspeak,  Push_thingspeak* );
-bool Push_thingspeak__thingspeak_push(  Push_thingspeak*, const Device_input**, int, bool );
-DECLARE_FAKE_VALUE_FUNC( bool, Push_thingspeak__thingspeak_push,  Push_thingspeak*, const Device_input**, int, bool );
-bool Push_thingspeak__thingspeak_push_raw(  Push_thingspeak*, const Device_input**, int, char* );
-DECLARE_FAKE_VALUE_FUNC( bool, Push_thingspeak__thingspeak_push_raw,  Push_thingspeak*, const Device_input**, int, char* );
+bool Push_thingspeak__thingspeak_push(  Push_thingspeak*, const int*, int, int, bool );
+DECLARE_FAKE_VALUE_FUNC( bool, Push_thingspeak__thingspeak_push,  Push_thingspeak*, const int*, int, int, bool );
+bool Push_thingspeak__thingspeak_push_raw(  Push_thingspeak*, const int*, int, int, char* );
+DECLARE_FAKE_VALUE_FUNC( bool, Push_thingspeak__thingspeak_push_raw,  Push_thingspeak*, const int*, int, int, char* );
 
 #endif // _AUTOMOCK_PUSH_THINGSPEAK_H

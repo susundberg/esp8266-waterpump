@@ -16,7 +16,7 @@ void Device::setup()  { Device__setup(  this ); }
 DEFINE_FAKE_VOID_FUNC( Device_input__Device_input,  Device_input*, const char* );
  Device_input::Device_input(const char* name)  : Device(name) { Device_input__Device_input(  this, name ); }
 
-int Device_input::get_value() const  { return this->value; }
+int Device::get_value() const  { return this->value; }
 DEFINE_FAKE_VOID_FUNC( Device_output__Device_output,  Device_output*, const char* );
  Device_output::Device_output(const char* name) : Device(name)  { Device_output__Device_output(  this, name ); }
 DEFINE_FAKE_VOID_FUNC( Device_output__set_value,  Device_output*, int );

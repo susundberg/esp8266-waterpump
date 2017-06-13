@@ -58,10 +58,7 @@ void Device_wlevel::measure_pulse_in()
    
    int new_value = (int)ma_new;
    
-   if ( this->value != new_value )
-   {
-      LOG_INFO("Distance %d filt:%d", (int)distance, this->value );
-   }
+
    this->value = new_value;
 }
 

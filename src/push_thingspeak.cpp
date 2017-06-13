@@ -11,7 +11,7 @@ Push_thingspeak::Push_thingspeak()
    this->timer.reset();
 }
 
-bool Push_thingspeak::thingspeak_push_raw(const Device_input** values, int values_n, char* buffer )
+bool Push_thingspeak::thingspeak_push_raw(const int* values, int index_start, int values_n, char* buffer ) 
 {
    WiFiClientSecure client;
    if ( client.connect( CONFIG.push.host, 443 ) == false )
@@ -19,7 +19,7 @@ bool Push_thingspeak::thingspeak_push_raw(const Device_input** values, int value
      LOG_WARN("Cannot connect '%s'", CONFIG.push.host );
      return false;
    }
-   LOG_INFO("Push data to '%s'", CONFIG.push.host );
+   LOG_INFO("Push data to '%s' index %d - %d", CONFIG.push.host, index_start, index_start + values_n );
    
    // cbuffer "https://api.thingspeak.com/update?api_key=<api key>&field1=0&field2=12"
    int buffer_offset = snprintf( buffer, buffer_size, "GET /update?api_key=%s", CONFIG.push.api_key );
@@ -27,8 +27,7 @@ bool Push_thingspeak::thingspeak_push_raw(const Device_input** values, int value
    
    for ( int loop = 0; loop < values_n; loop ++ )
    {
-      const Device_input* dev = values[loop];
-      ret = snprintf( buffer + buffer_offset, buffer_size - buffer_offset, "&field%d=%d", (loop+1), dev->get_value() );
+      ret = snprintf( buffer + buffer_offset, buffer_size - buffer_offset, "&field%d=%d", (index_start + 1 + loop), values[loop] );
       if ( ret >= buffer_size - buffer_offset )
          return false;
       buffer_offset += ret;
@@ -48,7 +47,7 @@ bool Push_thingspeak::thingspeak_push_raw(const Device_input** values, int value
    
     
 
-bool Push_thingspeak::thingspeak_push(const Device_input** values, int values_n, bool force_update )
+bool Push_thingspeak::thingspeak_push(const int* values, int index_start, int values_n, bool force_update )
 {
    
    if ( force_update == false && timer.check( push_interval_s*1000 ) == false )
@@ -61,7 +60,7 @@ bool Push_thingspeak::thingspeak_push(const Device_input** values, int values_n,
    if ( buffer == NULL )
       return false;
    
-   bool ret = thingspeak_push_raw(values, values_n, buffer );
+   bool ret = thingspeak_push_raw(values, index_start, values_n, buffer );
    free( buffer );
    return ret;
 }

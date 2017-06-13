@@ -4,10 +4,10 @@
 
 std::list<WiFiClient*> WiFiClient::_test_clients;
 std::function<void(WiFiClient*)> WiFiClient::_test_create_hook = NULL;
+bool WiFiClient::_test_verbose = false;
 
 WiFiClient::WiFiClient()
 {
-   _test_verbose = false;
    _test_clients.push_front( this );
    
    if (_test_create_hook != NULL )

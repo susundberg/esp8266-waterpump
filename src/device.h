@@ -13,6 +13,9 @@ public:
    virtual void loop();
    virtual void setup();
    
+   /// @returns current value
+   int get_value() const;
+   
 protected:
    const char* name;
    int value; /// Implementing class must have loop() providing updates to this value.  
@@ -25,8 +28,7 @@ class Device_input: public Device
 public:
    Device_input( const char* name );
   
-   /// @returns sensor current reading
-   int get_value() const;
+
 protected:
    // update value with extra print
    void update_value(int new_value);

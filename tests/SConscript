@@ -93,7 +93,7 @@ def build_mock_lib( env ):
    
    
    mocklib_sources =  [ "build/mocks_gen/mock_%s.cpp" % x for x in mocks_generated_sources ]
-   mocklib_sources += [ "build/mocks_man/mock_%s.cpp" % x for x in mocks_manual_sources ]
+   mocklib_sources += [ "build/%s" % x for x in Glob( "./mocks_man/*.cpp" ) ]
    mocklib_sources += [ "build/root/%s" % x for x in mocks_extra ]                     
                      
    mock_lib = env.Library( "build/build/mocks", mocklib_sources,   )

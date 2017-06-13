@@ -6,7 +6,7 @@
 
 #include "logger.h"
 #include "serial.h"
-
+#include "config.h"
 
 Logger LOG;
 
@@ -55,11 +55,6 @@ void Logger::set_status( Logger::Status status )
    this->status = status;
 }
 
-template<typename E>
-constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type 
-{
-   return static_cast<typename std::underlying_type<E>::type>(e);
-}
 
 void get_uptime( InfoUptime* uptime )
 {

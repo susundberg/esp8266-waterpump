@@ -3,6 +3,14 @@
 #define SUPA_CONFIG_H
 
 #include <stdint.h>
+#include <type_traits>
+
+template<typename E> 
+constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type 
+{
+   return static_cast<typename std::underlying_type<E>::type>(e);
+}
+
 
 /// Lets provide the 'user side' configuration as struct, so that its easier to change
 /// to read those from eeprom or file, if such day comes. 

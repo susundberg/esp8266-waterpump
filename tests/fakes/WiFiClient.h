@@ -31,7 +31,7 @@ class WiFiClient
      Buffer _test_output;
      Buffer _test_input;
      std::string _test_input_current;
-     bool _test_verbose;
+     static bool _test_verbose;
      
      // class variable where all the clients go
      static std::list<WiFiClient*> _test_clients;
