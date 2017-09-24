@@ -27,7 +27,7 @@ void Device_wlevel::measure_pulse_in()
    constexpr const float speed_of_sound_scalar = 0.17175f;
    const unsigned long max_timeout = CONFIG.pump.low_level_height_mm / speed_of_sound_scalar;
    
-   float duration = pulseIn( this->pin_echo, HIGH, max_timeout );
+   float duration = pulseIn( this->pin_echo, HIGH, max_timeout*2 );
     
    //Calculate the distance (in mm) based on the speed of sound.
    // c = 343.5 * 1000 / 1000000 = 0.3435 mm/ss
