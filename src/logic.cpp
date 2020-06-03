@@ -182,7 +182,7 @@ bool Logic::run_logic( const Config_run_table_time* time_now, Device_output* out
    }
    
    LogicStatus new_status = calculate_status( pump_value, water_switch);
-   
+
    if ( new_status == status )
       return false;
    int new_status_int = to_integral( new_status );

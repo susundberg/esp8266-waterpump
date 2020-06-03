@@ -18,14 +18,15 @@
 #include "push_thingspeak.h"
 
 Device_rtc      DEV_RTC("rtc");
-Device_wlevel   DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO );
-Device_pin_in   DEV_WDETECT("water_detect", PIN_WDETECT, 4, true ); // water detect switch - when its physically low, its open -> high
-Device_temphum  DEV_TEMP("temperature" );
-Device_temphum  DEV_HUMI("humidity" );
+Device_wlevel   DEV_WLEVEL("wlevel", PIN_TRIGGER, PIN_ECHO );
+Device_pin_in   DEV_WDETECT("wdetect", PIN_WDETECT, 4, true ); // water detect switch - when its physically low, its open -> high
+Device_temphum  DEV_TEMP("temp" );
+Device_temphum  DEV_HUMI("hum" );
 Device_pin_out  DEV_PUMP("pump", PIN_PUMP, 1 ); // pump inverted, since npn transistor - writing 0 will start the pump
 Device_pin_in   DEV_SWITCH("switch", PIN_SWITCH, 8, true ); // manual switch
 Logic           LOGIC;
 Push_thingspeak PUSH;
+static const int UPDATE_DELAY_S = 20 ; // Thingspeak has 15sec limit on free accounts :/
 
 /** Make some artificial devices for more information */
 class Device_uptime : public Device_input
@@ -140,17 +141,17 @@ static bool handle_push_devices(bool force)
 }
 
 
-
+#ifndef NDEBUG
 static bool handle_set_email()
 {
-   LOG_INFO("Status email requested.");
+   LOG_INFO("Email requested.");
    const int subject_len = 256;
    char* subject = (char*)malloc( subject_len );
    char* buffer = (char*)malloc(WEBSERVER_MAX_RESPONSE_SIZE);
    memset( subject, 0x00, subject_len );
    memset( buffer, 0x00, WEBSERVER_MAX_RESPONSE_SIZE);
    
-   snprintf( subject, subject_len, "[ESP] %s : Status report", CONFIG.hostname );
+   snprintf( subject, subject_len, "[ESP] %s: Status", CONFIG.hostname );
    int blen = generate_device_json( buffer );
    serial_print_raw( buffer, blen, true );
    bool ret = email_send( &CONFIG.email, CONFIG.email.receiver, subject, buffer );
@@ -159,6 +160,7 @@ static bool handle_set_email()
    free(buffer);
    return ret;
 }
+#endif
 
 static bool handle_set_ntp()
 {
@@ -210,7 +212,7 @@ void handle_get_time()
 void add_password_protected( const char* url, void (*handler)(void)  )
 {
   
-  char* buffer = (char*)malloc(1024);
+  char* buffer = (char*)malloc(256);
   strcpy( buffer, "/set/" );
   strcat( buffer, CONFIG.password );
   strcat( buffer, "/" );
@@ -237,11 +239,9 @@ void setup()
   WEBSERVER.on( "/get/time", handle_get_time );
   add_password_protected("ntp", []{ handle_http(handle_set_ntp()); } );
   add_password_protected("push",[]{ handle_http(handle_set_push()); });
-  //out of memory: add_password_protected("email", handle_set_email );
-
 }
-
-void handle_serial()
+#ifndef NDEBUG
+static void handle_serial()
 {
     int line_len;
     char* line = serial_receive( &line_len );
@@ -261,23 +261,29 @@ void handle_serial()
     }
     else
     {
-       serial_print( "Invalid command\n");
+       serial_print( "Invalid\n");
     }
 } 
-
+#endif
 
 void loop()
 {
    
    LOG.loop();
+
+   #ifndef NDEBUG
    handle_serial();
-   
+   #endif
+
+   static STimer update_timer;
+   static bool   update_when_elapsed = false;
+
    static unsigned long avail_memory_last = 0xFFFF;
    unsigned long avail_memory_now = PLATFORM.get_free_heap();
    
    if ( avail_memory_now < avail_memory_last )
    {
-      LOG_INFO("Available memory dropped: %u", avail_memory_now );
+      LOG_INFO("Mem: %u", avail_memory_now );
       avail_memory_last = avail_memory_now;
    }
    
@@ -287,6 +293,7 @@ void loop()
    
    delay(10);
    
+
    
    for ( unsigned int loop = 0; loop < DEVICES_N; loop ++ )
      DEVICES[loop]->loop();
@@ -294,6 +301,23 @@ void loop()
    Config_run_table_time time_now;
    DEV_RTC.time_of_day( &time_now );
    
+   if ( update_when_elapsed == true )
+   {
+      if ( update_timer.check( UPDATE_DELAY_S * 1000 ) == true )
+      {
+         update_when_elapsed = false;         
+         int delays[2];
+         bool valid = LOGIC.get_measurements( delays );
+         if ( valid )
+         {
+            PUSH.thingspeak_push( (const int*)delays, 6, 2, true );
+         }
+         else
+         {
+            LOG_INFO("Delay meas failed!");
+         }
+      }
+   }
    bool logic_changed = LOGIC.run_logic( &time_now, &DEV_PUMP, DEV_WLEVEL.get_value(), DEV_WDETECT.get_value(), DEV_SWITCH.get_value() );
    
    if ( logic_changed )
@@ -303,12 +327,9 @@ void loop()
       // if new status is idle, then we were pumping -> push the delays (assuming valid)
       if ( status == LogicStatus::idle )
       {
-         int delays[2];
-         bool valid = LOGIC.get_measurements( delays );
-         if (valid )
-         {
-            PUSH.thingspeak_push( (const int*)delays, 6, 2, true );
-         }
+         update_when_elapsed = true;
+         update_timer.reset();
+
       }
       else if ( status == LogicStatus::pump_started || status == LogicStatus::draining )
       {

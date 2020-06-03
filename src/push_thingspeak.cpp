@@ -14,6 +14,8 @@ Push_thingspeak::Push_thingspeak()
 bool Push_thingspeak::thingspeak_push_raw(const int* values, int index_start, int values_n, char* buffer ) 
 {
    WiFiClientSecure client;
+   client.setInsecure();
+
    if ( client.connect( CONFIG.push.host, 443 ) == false )
    {
      LOG_WARN("Cannot connect '%s'", CONFIG.push.host );
@@ -32,6 +34,8 @@ bool Push_thingspeak::thingspeak_push_raw(const int* values, int index_start, in
          return false;
       buffer_offset += ret;
    }
+   // LOG_INFO("Req: %s", buffer );
+   
    ret = snprintf( buffer + buffer_offset, buffer_size - buffer_offset, 
                    " HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", CONFIG.push.host );
    if ( ret >= buffer_size - buffer_offset )
@@ -39,7 +43,35 @@ bool Push_thingspeak::thingspeak_push_raw(const int* values, int index_start, in
    buffer_offset += ret;
    client.write( (const uint8_t *)buffer, buffer_offset );
    Serial.write( (const char *)buffer, buffer_offset );
+   // Serial.write("RES:\n");
+   delay(100);
+   int red = client.read( (uint8_t*)(buffer), buffer_size );
+   // Serial.write( (const char *)buffer, red );
+   // Serial.write("\n");
+
+   // output first line:
+   bool found = false;
+   for ( int loop = 0; loop < red; loop ++ )
+   {
+      if (buffer[loop] != '\n' && buffer[loop] != '\r')
+         continue;
+
+      buffer[loop] = 0x00;
+      // LOG_INFO("Resp: %s", buffer );
+      Serial.println( buffer );
+      found = true;
+      break;
+   }
+
    client.stop();
+
+   if ( found == false )
+   {
+      LOG_WARN("Invalid response (len:%d)", red );
+      return false;
+   }
+
+   
    return true;
 }
 

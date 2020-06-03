@@ -12,7 +12,7 @@ char* webserver_get_buffer()
   char* buffer = (char*)malloc( WEBSERVER_MAX_RESPONSE_SIZE );
   if (buffer == NULL )
   {
-     WEBSERVER.send(500, "text/plain", "Server error!");
+     WEBSERVER.send(500, "text/plain", "Error!");
      return NULL;
   }
   return buffer;
@@ -107,7 +107,7 @@ void webserver_setup()
   WEBSERVER.on( "/get/status", handle_status );
   WEBSERVER.serveStatic("/", SPIFFS, "/index.html", "max-age=86400");
   WEBSERVER.serveStatic("/data/", SPIFFS, "/", "max-age=86400");
-  WEBSERVER.onNotFound([](){ WEBSERVER.send(404, "text/plain", "Page not found"); });
+  WEBSERVER.onNotFound([](){ WEBSERVER.send(404, "text/plain", "Not found"); });
   WEBSERVER.begin();
 }
 

@@ -1,5 +1,6 @@
 #include "config.h"
 
+#error "This is sample file, replace with secrets!"
 
 // Note: G++ seems to require that these are in the proper order (same as declared).
 const Config CONFIG = {

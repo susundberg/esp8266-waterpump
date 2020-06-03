@@ -37,7 +37,7 @@ void Device_wlevel::measure_pulse_in()
     
    if (distance == 0 )
    {
-      LOG_WARN("Distance measurement failed (%d row)!", nfails );
+      LOG_WARN("Distance failed (# %d)!", nfails );
       nfails += 1;
       return;
    }
@@ -68,7 +68,7 @@ void Device_wlevel::loop()
    {
       if (nfails == nfail_limit )
       {  // log the error only once (to avoid spamming..)
-         LOG_FATAL("Distance sensor is failing.");
+         LOG_FATAL("Distance failed.");
          nfails = nfail_limit + 1;
       }
       this->value = 0;

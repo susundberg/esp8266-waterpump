@@ -62,7 +62,7 @@ bool read_response(WiFiClientSecure* client, char* buffer, int buffer_len, const
   
   if ( strncmp( buffer, exp_response, exp_size ) != 0 )
   {
-     LOG_WARN("Send failed (content) at '%s'", log_string );
+     LOG_WARN("Send failed (con) at '%s'", log_string );
      LOG_WARN("Got: '%s'", buffer );
      return false;
   }
@@ -73,11 +73,20 @@ bool email_send_raw( const Config_email* settings, const char* receiver, const c
                      char* buffer, WiFiClientSecure* client )
 {
 
-  LOG_INFO( "Sending email via '%s:%d'", settings->server_host, settings->server_port  );
-  
+  LOG_INFO( "Sending email '%s:%d'", settings->server_host, settings->server_port  );
+  client->setInsecure();
+
+//   if ( client->setFingerprint( settings->fingerprint ) == false )
+//   {
+//      LOG_WARN("Fingerprint failed!");
+//      return false;
+//   }
+
   if (!client->connect( settings->server_host, settings->server_port))
   {
-     LOG_WARN("Send failed on connect to server");
+     LOG_WARN("Email connect failed");
+   //   client->getLastSSLError( buffer, EMAIL_SEND_MAX_SIZE );
+   //   LOG_WARN("Error: %s", buffer );
      return false;
   }
 

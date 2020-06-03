@@ -17,7 +17,7 @@ class Logger
      enum class Status { BOOTING, RUNNING, ERROR };
      enum class Level { DEBUG, INFO, WARNING, ERROR, FATAL };
      
-     static const int max_lines = 16;
+     static const int max_lines = 32;
      static const int max_line_len = 80;
 
      Logger();  // plain initialization, sets status to booting

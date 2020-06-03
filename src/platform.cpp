@@ -1,6 +1,5 @@
 
 #include <Wire.h>
-#include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
 #include <FS.h>
 
@@ -33,7 +32,7 @@ void Platform_ESP8266::setup_wifi(void)
   WiFi.mode(WIFI_STA);
   // Connect to WiFi network
   WiFi.begin( CONFIG.wlan.sid, CONFIG.wlan.pass);
-  LOG_INFO("Wifi starting up .. ");
+  LOG_INFO("Wifi try: %s", CONFIG.wlan.sid );
 }
 
 bool Platform_ESP8266::connected()
@@ -54,7 +53,7 @@ void Platform_ESP8266::loop_wifi()
   {
      if ( wifi_ok == false )
      {
-        LOG_INFO("WIFI ok..");
+        LOG_INFO("WIFI ok.");
         LOG_INFO("Connected to %s - IP: %s", CONFIG.wlan.sid, WiFi.localIP().toString().c_str() );
      }
      this->wifi_ok = true;
@@ -63,7 +62,7 @@ void Platform_ESP8266::loop_wifi()
   {
      if ( wifi_ok == true )
      {
-        LOG_WARN("WIFI connection lost!");
+        LOG_WARN("WIFI lost!");
      }
      this->wifi_ok = false;
   }
@@ -79,13 +78,13 @@ void Platform_ESP8266::setup_ota()
 
   ArduinoOTA.onStart([]() 
   {
-    LOG_WARN("Update start!");
+    LOG_WARN("UPD start!");
     SPIFFS.end();
   });
   
   ArduinoOTA.onEnd([]() 
   {
-    LOG_WARN("Update done!");
+    LOG_WARN("UPD done!");
   });
   
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) 
@@ -97,11 +96,11 @@ void Platform_ESP8266::setup_ota()
        return;
     
     last = prog;
-    LOG_INFO("Progress: %u%%", prog );
+    LOG_INFO("UPD: %u%%", prog );
   });
   
   ArduinoOTA.onError([](ota_error_t error) {
-    LOG_FATAL("Error %u during update: ", error);
+    LOG_FATAL("Error %u", error);
   });
   ArduinoOTA.begin();
 }
@@ -116,11 +115,11 @@ void Platform_ESP8266::setup_fs()
   bool mounted = SPIFFS.begin();
   if (mounted == true )
   {
-     LOG_INFO("FS mounted.");   
+     LOG_INFO("FS ok.");   
   }
   else
   {
-    LOG_FATAL("FS mounting failed!");    
+    LOG_FATAL("FS mount failed!");    
   }
 }
 

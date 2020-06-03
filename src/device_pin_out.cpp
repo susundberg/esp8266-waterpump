@@ -25,7 +25,7 @@ void Device_pin_out::set_value( int value, bool verbose )
    
    if ( this->value != value && verbose )
    {
-      LOG_INFO("Device '%s' status now: %d", this->name, value );
+      LOG_INFO("Dev '%s': %d", this->name, value );
    }
    this->value = value;
 }

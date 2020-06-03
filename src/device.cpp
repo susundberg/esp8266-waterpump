@@ -35,7 +35,7 @@ void Device_input::update_value(int new_value)
       return;
    
    this->value = new_value;
-   LOG_INFO("Dev %s: value changed to %d", this->name, value );
+   LOG_INFO("Dev %s: value now %d", this->name, value );
 }
 
 
@@ -44,7 +44,7 @@ int Device::jsonify( char* buffer, int buffer_len )
    int len = snprintf( buffer, buffer_len, "{\"name\":\"%s\",\"value\":%d}", name, value );
    if (len >= buffer_len)
    {
-      LOG_ERROR("Jsonify: too long on '%s'", name );
+      LOG_ERROR("Too long JSON: '%s'", name );
       return 0;
    }
    return len;
