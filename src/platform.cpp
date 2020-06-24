@@ -10,7 +10,7 @@
 #include "platform.h"
 
 #define TIMEOUT_ON_WLAN_CONNECT_S 30 
-
+#define TIMEOUT_ON_WLAN_LOST_S    240
 Platform_ESP8266 PLATFORM;
 
 void Platform_ESP8266::setup()
@@ -19,6 +19,7 @@ void Platform_ESP8266::setup()
    this->setup_i2c();
    this->setup_wifi();
    this->setup_ota();
+   this->wifi_lost_timer.reset();
 }
 
 void Platform_ESP8266::loop()
@@ -63,6 +64,12 @@ void Platform_ESP8266::loop_wifi()
      if ( wifi_ok == true )
      {
         LOG_WARN("WIFI lost!");
+     }
+
+     if ( this->wifi_lost_timer.check( TIMEOUT_ON_WLAN_LOST_S*1000 ) )
+     {
+        LOG_FATAL("Wifi lost too long, reboot");
+        ESP.reset();
      }
      this->wifi_ok = false;
   }

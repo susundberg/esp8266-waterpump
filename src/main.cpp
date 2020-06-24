@@ -27,6 +27,10 @@ Device_pin_in   DEV_SWITCH("switch", PIN_SWITCH, 8, true ); // manual switch
 Logic           LOGIC;
 Push_thingspeak PUSH;
 static const int UPDATE_DELAY_S = 20 ; // Thingspeak has 15sec limit on free accounts :/
+static const int FATAL_REBOOT_DELAY_S = 2250.0;
+
+static STimer LOCAL_reset_fatal_timer;
+static bool   LOCAL_reset_fatal_timer_started = false;
 
 /** Make some artificial devices for more information */
 class Device_uptime : public Device_input
@@ -52,6 +56,13 @@ Device* const DEVICES[]  = {  &DEV_TEMP, &DEV_HUMI, &DEV_WLEVEL, &DEV_WDETECT, &
 
 static  void logger_fatal_hook( const char* log_line )
 {
+
+   if ( LOCAL_reset_fatal_timer_started == false )
+   {
+      LOCAL_reset_fatal_timer.reset();
+      LOCAL_reset_fatal_timer_started = true;
+   }
+
    // if we are not connected, we are not storing the messages for now.
    if ( PLATFORM.connected() == false )
       return;
@@ -193,7 +204,14 @@ static void handle_http( bool ret )
    free(buffer);
 }
 
-void handle_get_time()
+static bool handle_reboot()
+{
+    LOG_INFO("Reboot requested, reboot now!");
+    ESP.restart();
+    return true;
+}
+
+static void handle_get_time()
 {
    Config_run_table_time time;
    char* buffer = webserver_get_buffer();
@@ -209,7 +227,7 @@ void handle_get_time()
    
 }
 
-void add_password_protected( const char* url, void (*handler)(void)  )
+static void add_password_protected( const char* url, void (*handler)(void)  )
 {
   
   char* buffer = (char*)malloc(256);
@@ -237,8 +255,8 @@ void setup()
   
   WEBSERVER.on( "/get/dev", handle_get_devices );
   WEBSERVER.on( "/get/time", handle_get_time );
-  add_password_protected("ntp", []{ handle_http(handle_set_ntp()); } );
-  add_password_protected("push",[]{ handle_http(handle_set_push()); });
+  add_password_protected("ntp", []{ handle_http( handle_set_ntp() ); } );
+  add_password_protected("reboot",[]{ handle_http( handle_reboot() ); } );
 }
 #ifndef NDEBUG
 static void handle_serial()
@@ -266,6 +284,7 @@ static void handle_serial()
 } 
 #endif
 
+
 void loop()
 {
    
@@ -276,6 +295,7 @@ void loop()
    #endif
 
    static STimer update_timer;
+   
    static bool   update_when_elapsed = false;
 
    static unsigned long avail_memory_last = 0xFFFF;
@@ -292,7 +312,6 @@ void loop()
    PLATFORM.loop();
    
    delay(10);
-   
 
    
    for ( unsigned int loop = 0; loop < DEVICES_N; loop ++ )
@@ -301,6 +320,17 @@ void loop()
    Config_run_table_time time_now;
    DEV_RTC.time_of_day( &time_now );
    
+   
+   if ( LOG.get_status() == Logger::Status::ERROR )
+   {
+      if ( LOCAL_reset_fatal_timer_started && LOCAL_reset_fatal_timer.check( FATAL_REBOOT_DELAY_S*1000 ) )
+      {
+         LOG_INFO("Reboot timer is up, reboot now!");
+         ESP.restart();
+      }
+   }
+
+
    if ( update_when_elapsed == true )
    {
       if ( update_timer.check( UPDATE_DELAY_S * 1000 ) == true )

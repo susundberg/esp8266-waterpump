@@ -2,6 +2,7 @@
 #define SUPA_PLATFORM_H
 
 /** This file provides abstraction over the ESP platform provided stuff; wifi, I2C, STA and FS */
+#include "stimer.h"
 
 class Platform_ESP8266
 {
@@ -15,6 +16,7 @@ public:
    
 protected:
    bool wifi_ok;
+   STimer wifi_lost_timer;
    
    void setup_wifi();
    void setup_i2c();
